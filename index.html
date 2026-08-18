@@ -86,12 +86,12 @@
 
         /* 姓名：根据字符数计算，JS 动态适配 1/3 宽度容器 */
         .info-name span {
-            font-size: var(--name-font-size, 28px);
+            font-size: var(--name-font-size, 36px);
             white-space: nowrap;
         }
         /* 年龄：JS 动态适配 1/3 宽度容器 */
         .info-age span {
-            font-size: var(--age-font-size, 22px);
+            font-size: var(--age-font-size, 36px);
             white-space: nowrap;
         }
         /* 当前阶段：JS 动态计算字符密度，长文本自动缩小并允许换行 */
@@ -226,6 +226,73 @@
             border-bottom: 1px dashed #b8c5d6;
             margin-bottom: 14px;
         }
+        /* ========== 治疗方案模块虚线框（普通模块） ========== */
+        .module-block {
+            border: 1.5px dashed #b8c5d6;
+            border-radius: 10px;
+            padding: 16px 20px 18px;
+            margin: 18px 0 24px;
+            background: rgba(248, 249, 250, 0.4);
+            transition: border-color 0.2s ease;
+        }
+        .module-block:hover {
+            border-color: #2c7873;
+        }
+        .module-block > .section-title:first-child {
+            margin-top: 0;
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+            border-bottom: 1px dashed #b8c5d6;
+        }
+        /* ========== 独立顶层模块（区别于普通 module-block，更醒目） ========== */
+        .standalone-block {
+            border: 2px solid #2c7873;
+            border-radius: 12px;
+            padding: 0;
+            margin: 24px 0 30px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(44, 120, 115, 0.1);
+            overflow: hidden;
+        }
+        .standalone-block > .section-title:first-child {
+            margin: 0;
+            padding: 14px 22px;
+            background: linear-gradient(135deg, #2c7873 0%, #1a5f7a 100%);
+            color: #fff;
+            border-radius: 10px 10px 0 0;
+            border-bottom: none;
+        }
+        .standalone-block .standalone-content {
+            padding: 18px 22px 22px;
+        }
+        /* ========== 历史化疗记录块（每次化疗一个虚线框，便于区分） ========== */
+        .chemo-record {
+            border: 1.5px dashed #b8c5d6;
+            border-radius: 10px;
+            padding: 14px 18px 18px;
+            margin: 16px 0 22px;
+            background: rgba(248, 249, 250, 0.4);
+            transition: border-color 0.2s ease;
+        }
+        .chemo-record:hover {
+            border-color: #2c7873;
+        }
+        .chemo-record > .subsection-title:first-child {
+            margin-top: 0;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+        }
+        .chemo-record-tag {
+            display: inline-block;
+            background: #2c7873;
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 10px;
+            margin-right: 8px;
+            vertical-align: middle;
+            font-weight: 600;
+        }
         /* 已完成 / 进行中：绿色实线，更醒目 */
         .course-block--active {
             border: 2px solid #28a745;
@@ -289,6 +356,31 @@
             white-space: nowrap;
         }
 
+        /* ========== 费用明细行标记（序号+颜色圆点） ========== */
+        .row-marker {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            vertical-align: -1px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+            margin-right: 6px;
+        }
+        .row-marker-gray { background: #adb5bd; }
+        .row-marker-green { background: #28a745; }
+        .row-marker-blue { background: #007bff; }
+        /* 行类型：背景色淡，配合圆点强调 */
+        .table-wrap table tbody tr.row-outpatient td:nth-child(2) {
+            background: rgba(173, 181, 189, 0.05);
+        }
+        .table-wrap table tbody tr.row-chemo td:nth-child(2) {
+            background: rgba(40, 167, 69, 0.10);
+        }
+        .table-wrap table tbody tr.row-hospital td:nth-child(2) {
+            background: rgba(0, 123, 255, 0.10);
+        }
+
         /* ========== 治疗时间线表格 - 按状态设置行背景色 ========== */
         /* 表格行默认无背景色（继承 thead 灰），避免覆盖状态色 */
         .table-wrap table tbody tr {
@@ -312,7 +404,7 @@
             background: linear-gradient(90deg, #fff3cd 0%, #fff8e1 100%) !important;
             border-left: 4px solid #ffc107;
         }
-        /* 异常/危险行（红色：⚠ 数据异常或方案需调整） */
+        /* 异常/危险行（红色：⚠️ 数据异常或方案需调整） */
         .table-wrap table tbody tr.danger {
             background: linear-gradient(90deg, #f8d7da 0%, #fce8eb 100%) !important;
             border-left: 4px solid #dc3545;
@@ -475,6 +567,101 @@
             line-height: 1.5;
         }
 
+        /* ========== 每日摄入参考标准卡片 ========== */
+        .daily-std-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin: 16px 0 22px;
+        }
+        .daily-std-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            padding: 14px 16px;
+            border-left: 4px solid #2c7873;
+            transition: all 0.2s ease;
+        }
+        .daily-std-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+        .daily-std-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .daily-std-title {
+            font-weight: 600;
+            color: #1a5f7a;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .daily-std-value {
+            font-size: 17px;
+            font-weight: bold;
+            color: #28a745;
+            margin: 4px 0;
+        }
+        .daily-std-note {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        /* ========== 餐次颜色主题（饮食计划） ========== */
+        /* 早餐：暖黄渐变 */
+        .meal-breakfast {
+            background: linear-gradient(90deg, #fff8e1 0%, #ffecb3 100%) !important;
+            border-left: 4px solid #ff9800 !important;
+        }
+        /* 辅餐（上午）：浅粉渐变 */
+        .meal-snack-am {
+            background: linear-gradient(90deg, #fce4ec 0%, #f8bbd0 100%) !important;
+            border-left: 4px solid #e91e63 !important;
+        }
+        /* 午餐：橙黄渐变（主餐，色彩最强） */
+        .meal-lunch {
+            background: linear-gradient(90deg, #fff3e0 0%, #ffcc80 100%) !important;
+            border-left: 4px solid #ff5722 !important;
+        }
+        /* 辅餐（下午）：浅绿渐变 */
+        .meal-snack-pm {
+            background: linear-gradient(90deg, #e8f5e9 0%, #c8e6c9 100%) !important;
+            border-left: 4px solid #4caf50 !important;
+        }
+        /* 晚餐：浅蓝紫渐变 */
+        .meal-dinner {
+            background: linear-gradient(90deg, #ede7f6 0%, #b39ddb 100%) !important;
+            border-left: 4px solid #673ab7 !important;
+        }
+        /* 餐次emoji 单元（加粗+略大） */
+        .meal-icon-cell {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        /* 周次标题（每天小节） */
+        .day-block {
+            border: 1.5px dashed #b8c5d6;
+            border-radius: 10px;
+            padding: 14px 18px 16px;
+            margin: 16px 0 22px;
+            background: rgba(248, 249, 250, 0.4);
+            transition: border-color 0.2s ease;
+        }
+        .day-block:hover {
+            border-color: #2c7873;
+        }
+        .day-block > .subsection-title:first-child {
+            margin-top: 0;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        /* 每天小节标题里的 emoji 大一点 */
+        .day-emoji {
+            font-size: 18px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
         /* ========== 时间戳 ========== */
         .timestamp {
             text-align: right;
@@ -604,6 +791,7 @@
     <!-- ==================== /CSS 样式 ==================== -->
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 <!-- ==================== /HTML 头部 ==================== -->
 </head>
 <!-- ==================== HTML 主体 ==================== -->
@@ -622,11 +810,11 @@
         </div>
         <div class="info-item info-stage">
             <label>当前阶段</label>
-            <span data-auto-size="stage">✅ 第二疗程·第1次化疗已完成（08-13）·08-18 化疗前检查已完成（CA19-9 显著下降至 79.24 化疗明确有效✅）·骨髓抑制波动期已恢复·09-03 增强CT评估（关键决策点：手术 vs 继续化疗）</span>
+            <span data-auto-size="stage">✅ 第二疗程·第1次化疗已完成（08-13）<br>✅ 08-18 化疗前检查已完成（CA19-9 显著下降至 79.24，化疗明确有效）<br>🟢 骨髓抑制波动期已恢复<br>🎯 09-03 增强CT评估（关键决策点：手术 vs 继续化疗）</span>
         </div>
     </div>
 
-    <div class="diagnosis-tags">
+<div class="diagnosis-tags">
         <span class="tag">胰颈胰体部恶性肿瘤（胰腺导管腺癌）</span>
         <span class="tag danger">高血压病3级（极高危）</span>
         <span class="tag warning">慢性乙型病毒性肝炎</span>
@@ -644,31 +832,31 @@
 
     <!-- 指标趋势 -->
     <div id="indicators" class="tab-content active">
-        <!-- ========== 肿瘤标志物（CA19-9/CEA）变化趋势 ========== -->
+<!-- ========== 肿瘤标志物（CA19-9/CEA）变化趋势 ========== -->
         <h2 class="section-title">肿瘤标志物变化趋势</h2>
         <div class="alert alert-success">
             <strong>趋势分析：</strong><br>
-            • <strong>07-10 基准：</strong>CA19-9 = <strong>131 ↑</strong>（高于上限 37）<br>
-            • <strong>07-21 化疗后第 6 天：</strong>CA19-9 一过性升高至 <strong>317.8 ↑</strong>（肿瘤细胞坏死后释放）<br>
-            • <strong>07-28 第二疗程前：</strong>CA19-9 = <strong>190.46 ↑</strong>（↓40%，开始下降）<br>
-            • <strong>08-11 第三疗程前：</strong>CA19-9 = <strong>139.42 ↑</strong>（接近基准 131）<br>
-            • <strong>08-18 第四疗程后第 5 天：</strong>CA19-9 = <strong>79.24 ↑</strong>（↓43%，首次 &lt;100 🎉，<strong>化疗显著有效 ✅</strong>）<br>
+            • <strong>07-10 第一疗程·第1次化疗前（基准）：</strong>CA19-9 = <strong>131 ↑</strong>（高于上限 37）<br>
+            • <strong>07-21 第一疗程·第2次化疗前：</strong>CA19-9 一过性升高至 <strong>317.8 ↑</strong>（肿瘤细胞坏死后释放）<br>
+            • <strong>07-28 第一疗程·第3次化疗前：</strong>CA19-9 = <strong>190.46 ↑</strong>（↓40%，开始下降）<br>
+            • <strong>08-11 第二疗程·第1次化疗前：</strong>CA19-9 = <strong>139.42 ↑</strong>（接近基准 131）<br>
+            • <strong>08-18 第二疗程·第2次化疗前：</strong>CA19-9 = <strong>79.24 ↑</strong>（↓43%，首次 &lt;100 🎉，<strong>化疗显著有效 ✅</strong>）<br>
             📊 较基准 131 下降 <strong>39.5%</strong>，提示 AG 方案对本患者高度敏感，可继续 6 周期完整化疗
         </div>
         <div class="chart-container">
             <canvas id="tumorChart"></canvas>
         </div>
 
-        <!-- ========== 血常规（WBC/HGB/PLT）变化趋势 ========== -->
+        <!-- ========== 血常规（白细胞/血红蛋白/血小板）变化趋势 ========== -->
         <h2 class="section-title">血常规变化趋势</h2>
         <div class="alert">
             <strong>趋势分析：</strong><br>
-            <strong>📌 白细胞 + 中性粒（化疗间歇期骨髓抑制波动）：</strong><br>
-            • 07-10 化疗前：WBC 3.52 / 中性粒 2.51（正常范围）<br>
-            • 07-21 化疗后第 6 天：WBC <strong>2.24 ↓</strong> / 中性粒 <strong>1.04 ↓</strong>（II 度骨髓抑制）<br>
-            • 07-28 第三疗程前：WBC <strong>13.44 ↑</strong> / 中性粒 <strong>10.66 ↑</strong>（恢复期代偿性升高）<br>
-            • 08-11 第四疗程前：WBC <strong>3.23 ↓</strong> / 中性粒 <strong>1.38 ↓</strong>（再次下降，化疗间歇期第 12 天）<br>
-            • <strong>08-18 第四疗程后第 5 天：WBC 26.13 ↑ / 中性粒 15.68 ↑</strong>（升白针艾贝格司亭α 08-13 化疗当日预防性给药，第 5 天达峰 ✅）<br>
+            <strong>📌 白细胞 + 中性粒细胞（化疗间歇期骨髓抑制波动）：</strong><br>
+            • 07-10 第一疗程·第1次化疗前：白细胞 3.52 / 中性粒细胞绝对值 2.51（正常范围）<br>
+            • 07-21 第一疗程·第2次化疗前：白细胞 <strong>2.24 ↓</strong> / 中性粒细胞绝对值 <strong>1.04 ↓</strong>（Ⅱ度骨髓抑制）<br>
+            • 07-28 第一疗程·第3次化疗前：白细胞 <strong>13.44 ↑</strong> / 中性粒细胞绝对值 <strong>10.66 ↑</strong>（恢复期代偿性升高）<br>
+            • 08-11 第二疗程·第1次化疗前：白细胞 <strong>3.23 ↓</strong> / 中性粒细胞绝对值 <strong>1.38 ↓</strong>（再次下降，化疗间歇期第 12 天）<br>
+            • <strong>08-18 第二疗程·第2次化疗前：白细胞 26.13 ↑ / 中性粒细胞绝对值 15.68 ↑</strong>（升白针艾贝格司亭α 08-13 化疗当日预防性给药，第 5 天达峰 ✅）<br>
             <strong>📌 血红蛋白（轻度贫血，逐步回升）：</strong><br>
             • 07-10：118 → 07-21：<strong>94 ↓</strong> → 07-28：<strong>90 ↓</strong> → 08-11：<strong>96 ↓</strong> → <strong>08-18：102 ↓</strong>（较 08-11 回升 +6 g/L，仍低于下限 115）<br>
             <strong>📌 血小板（整体稳定）：</strong><br>
@@ -695,7 +883,7 @@
                         <th>CA19-9<br><small>(U/mL, <37)</small></th>
                         <th>CEA<br><small>(ng/mL, <5)</small></th>
                         <th>白细胞<br><small>(×10⁹/L, 3.5-9.5)</small></th>
-                        <th>中性粒<br><small>(×10⁹/L, 1.8-6.3)</small></th>
+                        <th>中性粒细胞绝对值<br><small>(×10⁹/L, 1.8-6.3)</small></th>
                         <th>血红蛋白<br><small>(g/L, 115-150)</small></th>
                         <th>血小板<br><small>(×10⁹/L, 125-350)</small></th>
                         <th>备注</th>
@@ -715,7 +903,7 @@
                     </tr>
                     <tr class="danger">
                         <td>2026-07-21</td>
-                        <td>🔬 第一疗程·第1次化疗后（化疗后第6天）</td>
+                        <td>🔬 第一疗程·第2次化疗前</td>
                         <td class="abnormal">317.8 ↑</td>
                         <td>1.77</td>
                         <td class="abnormal">2.24 ↓</td>
@@ -744,18 +932,18 @@
                         <td class="abnormal">1.38 ↓</td>
                         <td class="abnormal">96 ↓</td>
                         <td>241</td>
-                        <td>CA19-9 接近基准；骨髓抑制波动期（WBC+中性粒+HGB 偏低）</td>
+                        <td>CA19-9 接近基准；骨髓抑制波动期（白细胞+中性粒细胞+血红蛋白偏低）</td>
                     </tr>
                     <tr class="danger">
                         <td>2026-08-18</td>
-                        <td>🔬 第二疗程·第1次化疗后·第5天</td>
+                        <td>🔬 第二疗程·第2次化疗前</td>
                         <td class="abnormal">79.24 ↑</td>
                         <td>-</td>
                         <td class="abnormal">26.13 ↑</td>
                         <td class="abnormal">15.68 ↑</td>
                         <td class="abnormal">102 ↓</td>
                         <td>301</td>
-                        <td>🎉 CA19-9 显著下降至 &lt;100（化疗明确有效✅）；WBC 26.13↑ 升白针艾贝格司亭α作用；eGFR 89.48 G2 期；LDH 333 ↑</td>
+                        <td>🎉 CA19-9 显著下降至 &lt;100（化疗明确有效✅）；白细胞 26.13↑ 升白针艾贝格司亭α作用；估算肾小球滤过率 89.48 G2 期；乳酸脱氢酶 333 ↑</td>
                     </tr>
                 </tbody>
             </table>
@@ -870,7 +1058,7 @@
                     <td>2026-07-20</td>
                     <td>🧬 基因检测（实体瘤 559 基因 + PD-L1）</td>
                     <td>广州迈景基因医学科技有限公司</td>
-                    <td class="status-cell">⚠ 已付款（支付宝/招商银行卡），07-29 报告出具 + 07-30 发票开具</td>
+                    <td class="status-cell">⚠️ 已付款（支付宝/招商银行卡），07-29 报告出具 + 07-30 发票开具</td>
                 </tr>
                 <tr class="highlight">
                     <td>2026-07-21</td>
@@ -936,7 +1124,7 @@
             <strong>07-31 ~ 08-10：</strong>休整期，骨髓恢复
         </div>
         <div class="alert alert-info">
-            <strong>ℹ️ 09-03 增强 CT 评估（第二疗程后）</strong>，符合"每 2 疗程 1 次"原则。<strong class="critical-date">⚠️ 关键决策点：手术 vs 继续化疗（09-03）</strong>
+            <strong>ℹ️ 09-03 增强 CT 评估（第二疗程后）</strong>，符合"每 2 疗程 1 次"原则。<strong class="critical-date">⚠️️ 关键决策点：手术 vs 继续化疗（09-03）</strong>
         </div>
 
         <!-- ========== 第二疗程 ========== -->
@@ -1534,6 +1722,8 @@
     <!-- 化疗方案 -->
     <div id="chemotherapy" class="tab-content">
         <!-- ========== AG 方案详解 ========== -->
+
+        <div class="module-block">
         <h2 class="section-title">AG化疗方案详解</h2>
 
         <!-- 方案组成（白蛋白紫杉醇 + GEM） -->
@@ -1596,7 +1786,7 @@
                 <tr>
                     <td>CA19-9</td>
                     <td>131 U/mL（07-10 基准）</td>
-                    <td>139.42 U/mL（08-11 第二疗程前）→ 79.24 U/mL（08-18 第二疗程后·第5天）</td>
+                    <td>139.42 U/mL（08-11 第二疗程·第1次化疗前）→ 79.24 U/mL（08-18 第二疗程·第2次化疗前）</td>
                     <td>化疗后一过性升高（最高 317.8）后持续下降</td>
                     <td class="highlight">✅ 化疗明确有效（接近基准）</td>
                 </tr>
@@ -1633,13 +1823,13 @@
                 <tr>
                     <td>骨髓抑制（白细胞+中性粒↓）</td>
                     <td>常见</td>
-                    <td class="warning">07-21: WBC 2.24↓ 中性粒 1.04↓<br>07-28: WBC 13.44↑（代偿）<br>08-11: WBC 3.23↓ 中性粒 1.38↓<br>08-18: WBC 26.13↑ 中性粒 15.68↑（升白针艾贝格司亭α 08-13 化疗后第 5 天作用）✅</td>
-                    <td>曲拉西利预防、利可君升白治疗；化疗前复查血常规（建议 WBC≥3.0、中性粒≥1.5 方可给药）</td>
+                    <td class="warning">07-21: 白细胞 2.24↓ 中性粒细胞 1.04↓<br>07-28: 白细胞 13.44↑（代偿）<br>08-11: 白细胞 3.23↓ 中性粒细胞 1.38↓<br>08-18: 白细胞 26.13↑ 中性粒细胞 15.68↑（升白针艾贝格司亭α 08-13 化疗后第 5 天作用）✅</td>
+                    <td>曲拉西利预防、利可君升白治疗；化疗前复查血常规（建议白细胞≥3.0、中性粒细胞≥1.5 方可给药）</td>
                 </tr>
                 <tr>
                     <td>贫血（血红蛋白+红细胞↓）</td>
                     <td>常见</td>
-                    <td class="warning">HGB: 94→90→<strong>96 g/L</strong>（08-11）→ <strong>102 g/L（08-18，+6g/L 略回升）</strong>（持续偏低）<br>RBC 08-11: 3.11↓ → 08-18: 3.24↓<br>红细胞分布宽度 CV 16.7↑ + SD 56.9↑</td>
+                    <td class="warning">血红蛋白: 94→90→<strong>96 g/L</strong>（08-11）→ <strong>102 g/L（08-18，+6g/L 略回升）</strong>（持续偏低）<br>红细胞 08-11: 3.11↓ → 08-18: 3.24↓<br>红细胞分布宽度 CV 16.7↑ + SD 56.9↑</td>
                     <td>铁剂（硫酸亚铁缓释片）纠正、监测、必要时输血；加强营养（动物肝脏/瘦肉/深色蔬菜/蛋白粉）</td>
                 </tr>
                 <tr>
@@ -1664,8 +1854,10 @@
         </table>
 
         </div>
+        </div>
 
-        <!-- ========== 基因检测结果（07-20 送检，07-29 报告出具） ========== -->
+
+        <div class="module-block">
         <h2 class="section-title">基因检测结果</h2>
         <div class="alert alert-success">
             <strong>🧬 肿瘤 559 基因检测报告（已出具 2026-07-29）</strong><br>
@@ -1678,7 +1870,6 @@
             　• <strong>TMB-low</strong>（7.81 mut/Mb）；<strong>MSS</strong>；<strong>PD-L1 阴性</strong>（TPS 0% / CPS 0）<br>
             　• <strong>胚系 92 个肿瘤遗传易感基因：未检出致病变异</strong>
         </div>
-
         <!-- II 类潜在临床意义突变 -->
         <h3 class="subsection-title">具有潜在临床意义的变异（II 类）</h3>
         <div class="table-wrap">
@@ -1792,13 +1983,16 @@
             • <strong>KRAS+CDKN2A+TP53 三突变共存</strong>：无成熟靶向药，AG 方案仍为标准；SMAD4 未检出，相对四突变者偏轻<br>
             • <strong>胚系 92 基因阴性</strong>：家族史（姐姐乳腺癌）未发现遗传易感基因，但<strong>仍建议家族女性乳腺/卵巢年度体检</strong>（家族史独立风险）<br>
             • <strong>CBL p.S216T 丰度 44.4% 较高</strong>：需结合胚系结果判断来源（本患者胚系阴性，倾向体细胞来源，但仍建议关注）<br>
-            • <strong>当前主线仍是 AG 方案化疗</strong>（08-11 CA19-9 降至 139.42 接近基准，提示明确有效），基因检测结果更多用于<strong>未来二线/维持/临床试验</strong>方向参考；<strong>✅ 08-11 与主治讨论已完成</strong>（维持治疗+KRAS G12D 试验入组+CBL 高丰度随访）
+
+        </div>
         </div>
 
+
         <!-- ========== 后续治疗方案（基于基因检测） ========== -->
+        <div class="module-block">
         <h2 class="section-title">后续治疗方案（预留）</h2>
         <div class="alert">
-            <strong>⚠ 以下为潜在的后续治疗方案，具体方案需根据疗效评估和基因检测结果确定</strong>
+            <strong>⚠️ 以下为潜在的后续治疗方案，具体方案需根据疗效评估和基因检测结果确定</strong>
         </div>
 
         <!-- 基因检测建议（基于 07-29 实测结果） -->
@@ -1879,14 +2073,14 @@
                     <td><strong>KRAS G12D 突变</strong></td>
                     <td>胰腺癌最常见 KRAS 突变；国内<strong>无获批靶向药</strong></td>
                     <td><span class="result-positive">✓ 检出（21.3%）</span></td>
-                    <td>⚠ 关注 I/II 期临床试验：Daraxonrasib、IMM-1-104、YL-17231、阿替利珠单抗+Cobimetinib、曲美替尼+Navitoclax、Avutometinib+Defactinib</td>
+                    <td>⚠️ 关注 I/II 期临床试验：Daraxonrasib、IMM-1-104、YL-17231、阿替利珠单抗+Cobimetinib、曲美替尼+Navitoclax、Avutometinib+Defactinib</td>
                     <td>高（试验入组）</td>
                 </tr>
                 <tr class="warning">
                     <td><strong>CDKN2A / TP53 突变</strong></td>
                     <td>与 KRAS G12D 形成三突变共突变，预后偏差</td>
                     <td><span class="result-positive">✓ 均检出</span>（CDKN2A 22.1% + TP53 22.3%）</td>
-                    <td>⚠ 无成熟靶向药；建议继续 AG 主线，密切监测疗效</td>
+                    <td>⚠️ 无成熟靶向药；建议继续 AG 主线，密切监测疗效</td>
                     <td>监测</td>
                 </tr>
                 <tr>
@@ -2011,9 +2205,12 @@
             　• VTE 预防（Khorana 评分）<br>
             　• 疼痛三阶梯治疗<br>
             　• HBV 抗病毒持续（恩替卡韦，本患者 08-18 新增 30 片）
-        </div>
+        </div></div>
+
+
 
         <!-- ========== 辅助用药 ========== -->
+        <div class="module-block">
         <h2 class="section-title">辅助用药</h2>
         <div class="table-wrap">
 
@@ -2071,9 +2268,14 @@
 
         </div>
 
-        <!-- ========== 历史化疗记录 ========== -->
+        </div>
+
+        <!-- ========== 历史化疗记录（独立顶层模块） ========== -->
+        <div class="module-block">
         <h2 class="section-title">历史化疗记录</h2>
 
+
+        <div class="chemo-record">
         <h3 class="subsection-title">第1次化疗（07-15 住院期间）</h3>
         <div class="table-wrap">
 
@@ -2115,7 +2317,10 @@
         </table>
 
         </div>
+        </div>
 
+
+        <div class="chemo-record">
         <h3 class="subsection-title">第2次化疗（07-23 门诊）</h3>
         <div class="table-wrap">
 
@@ -2211,7 +2416,10 @@
         </table>
 
         </div>
+        </div>
 
+
+        <div class="chemo-record">
         <h3 class="subsection-title">第3次化疗（07-30 第一疗程结束）</h3>
         <div class="table-wrap">
 
@@ -2277,7 +2485,10 @@
         </table>
 
         </div>
+        </div>
 
+
+        <div class="chemo-record">
         <h3 class="subsection-title">第4次化疗（08-13 第二疗程·第1次）</h3>
         <div class="table-wrap">
 
@@ -2344,7 +2555,7 @@
 
         </div>
 
-        <h3 class="subsection-title">口服药（08-13 开具）</h3>
+        <h3 class="subsection-title">💊 口服药（同次门诊 08-13 开具）</h3>
         <div class="table-wrap">
 
             <table>
@@ -2383,6 +2594,8 @@
         </table>
 
         </div>
+        </div>
+        </div>
     </div>
 
     <!-- 饮食计划 -->
@@ -2391,6 +2604,68 @@
         <h2 class="section-title">饮食原则</h2>
         <div class="alert alert-info">
             <strong>胰腺癌患者饮食核心原则：</strong>高蛋白、高热量、少量多餐、低脂低糖、软烂易消化
+        </div>
+
+        <!-- 每日摄入参考标准（推荐量；具体禁忌见下方"食物禁忌清单"） -->
+        <h3 class="subsection-title">每日摄入参考标准</h3>
+        <div class="alert alert-info" style="font-size: 12px; padding: 8px 12px;">
+            <strong>📋 适用人群：</strong>59岁女性化疗患者 · 体重约 50kg · AG方案 · 化疗期间。<strong>具体食物禁忌清单见下方"🚫 食物禁忌清单"</strong>
+        </div>
+        <div class="daily-std-grid">
+            <div class="daily-std-card">
+                <span class="daily-std-icon">💧</span>
+                <div class="daily-std-title">每日饮水量</div>
+                <div class="daily-std-value">2000 ml / 8 杯</div>
+                <div class="daily-std-note">每杯 250ml，少量多次。化疗期间呕吐/腹泻易脱水，需额外补充。⚠️ 肾功不全/水肿需遵医嘱调整</div>
+            </div>
+            <div class="daily-std-card">
+                <span class="daily-std-icon">🍚</span>
+                <div class="daily-std-title">碳水化合物</div>
+                <div class="daily-std-value">250 ~ 300 g/天</div>
+                <div class="daily-std-note">占总热量 50-60%。优先低 GI 食物（粗粮/全谷物），避免精制糖。⚠️ 糖尿病需控制总糖摄入</div>
+            </div>
+            <div class="daily-std-card">
+                <span class="daily-std-icon">🥩</span>
+                <div class="daily-std-title">蛋白质</div>
+                <div class="daily-std-value">60 ~ 75 g/天</div>
+                <div class="daily-std-note">按 1.2-1.5 g/kg 体重。优质蛋白（鱼/蛋/豆腐/瘦肉）。化疗恢复期蛋白需求增加，必要时蛋白粉补充</div>
+            </div>
+            <div class="daily-std-card">
+                <span class="daily-std-icon">🛢️</span>
+                <div class="daily-std-title">脂肪（分类摄入）</div>
+                <div class="daily-std-value">总量 40 ~ 60 g/天</div>
+                <div class="daily-std-note">
+                    <strong>🟢 推荐（优质脂肪）：</strong>植物油 20-30g/天（橄榄油/茶籽油优先）+ 深海鱼 100g×2次/周（三文鱼/沙丁鱼/秋刀鱼）+ 坚果 15-20g/天（核桃/杏仁）+ 牛油果 半个/天（约 70g）<br>
+                    <strong>🟡 适量（普通植物油）：</strong>玉米油/葵花籽油/花生油 限量 20g/天<br>
+                    <strong>🔴 限制（动物脂肪）：</strong>肥肉 &lt;10g/天 · 猪油/牛油/黄油 尽量避免<br>
+                    <strong>⛔ 避免：</strong>油炸食品 / 烧烤 / 加工肉制品（香肠/培根）<br>
+                    <strong>⚠️ 注意：</strong>胰腺癌患者因胰腺分泌脂肪酶减少，脂肪消化能力下降，<strong>需控制总脂肪但不绝对禁止</strong>；建议<strong>少量多餐 + 优质脂肪为主</strong>
+                </div>
+            </div>
+            <div class="daily-std-card">
+                <span class="daily-std-icon">🚶‍♀️</span>
+                <div class="daily-std-title">每日运动量</div>
+                <div class="daily-std-value">30 分钟 / 6000 步</div>
+                <div class="daily-std-note">轻度有氧（散步/太极）。避免剧烈运动。⚠️ 白细胞低（&lt;3.0）避免公共场所，卧床休息为主</div>
+            </div>
+            <div class="daily-std-card">
+                <span class="daily-std-icon">🧂</span>
+                <div class="daily-std-title">盐摄入</div>
+                <div class="daily-std-value">&lt; 5 g/天</div>
+                <div class="daily-std-note">WHO 推荐上限。患者合并高血压 3 级（极高危），需严格控盐。⚠️ 避免腌制食品/酱油过量</div>
+            </div>
+            <div class="daily-std-card">
+                <span class="daily-std-icon">💊</span>
+                <div class="daily-std-title">膳食纤维</div>
+                <div class="daily-std-value">25 ~ 30 g/天</div>
+                <div class="daily-std-note">蔬菜 300-500g + 水果 200-300g。⚠️ 腹泻时减量，便秘时增加；避免粗纤维（粗粮/坚果/芹菜）</div>
+            </div>
+            <div class="daily-std-card">
+                <span class="daily-std-icon">🌡️</span>
+                <div class="daily-std-title">总能量</div>
+                <div class="daily-std-value">1800 ~ 2200 kcal/天</div>
+                <div class="daily-std-note">按 30-35 kcal/kg 体重。化疗期间代谢增加，能量需求↑。⚠️ 食欲差时少量多餐 + 营养粉（安素）补充</div>
+            </div>
         </div>
 
         <!-- 饮食结构建议（5 餐分配） -->
@@ -2403,47 +2678,59 @@
                     <th>餐次</th>
                     <th>时间</th>
                     <th>建议内容</th>
+                    <th>克重参考</th>
                     <th>热量占比</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>早餐</td>
+                <tr class="meal-breakfast">
+                    <td class="meal-icon-cell">🌅 早餐</td>
                     <td>07:00-08:00</td>
                     <td>粥类、馒头、蒸蛋、牛奶</td>
-                    <td>20%</td>
+                    <td>约 350g（粥200g+馒头50g+蒸蛋50g+牛奶200ml）</td>
+                    <td><strong>20%</strong></td>
                 </tr>
-                <tr>
-                    <td>辅餐</td>
+                <tr class="meal-snack-am">
+                    <td class="meal-icon-cell">☕ 辅餐（上午）</td>
                     <td>10:00</td>
                     <td>果汁、饼干、营养粉</td>
+                    <td>约 200g（果汁150ml+饼干20g+营养粉30g）</td>
                     <td>10%</td>
                 </tr>
-                <tr>
-                    <td>午餐</td>
+                <tr class="meal-lunch">
+                    <td class="meal-icon-cell">🍚 午餐</td>
                     <td>12:00-13:00</td>
                     <td>软烂面条、鱼肉、豆腐、蔬菜</td>
-                    <td>35%</td>
+                    <td>约 400g（面100g+鱼100g+豆腐50g+菜150g）</td>
+                    <td><strong>35%</strong></td>
                 </tr>
-                <tr>
-                    <td>辅餐</td>
+                <tr class="meal-snack-pm">
+                    <td class="meal-icon-cell">🍎 辅餐（下午）</td>
                     <td>15:00-16:00</td>
                     <td>酸奶、水果泥、安素</td>
+                    <td>约 250g（酸奶100g+水果100g+安素50g）</td>
                     <td>10%</td>
                 </tr>
-                <tr>
-                    <td>晚餐</td>
+                <tr class="meal-dinner">
+                    <td class="meal-icon-cell">🌙 晚餐</td>
                     <td>18:00-19:00</td>
                     <td>粥类、蒸菜、肉末、软面</td>
-                    <td>25%</td>
+                    <td>约 350g（粥150g+菜100g+肉末50g+面50g）</td>
+                    <td><strong>25%</strong></td>
                 </tr>
             </tbody>
         </table>
 
         </div>
 
-        <!-- 推荐食物 -->
-        <h3 class="subsection-title">推荐食物</h3>
+        <!-- 食物选择指南（推荐+禁忌+化疗期注意） -->
+        <div class="module-block">
+        <h3 class="subsection-title">📚 食物选择指南</h3>
+        <div class="alert alert-info" style="font-size: 12px; padding: 8px 12px;">
+            <strong>📌 分两部分：</strong>🟢 <strong>推荐食物</strong>（化疗期间安全有益）+ 🔴 <strong>禁忌食物</strong>（必须避免/限量）
+        </div>
+
+        <h3 class="subsection-title">🟢 推荐食物</h3>
         <div class="table-wrap">
 
             <table>
@@ -2455,23 +2742,23 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>蛋白质</td>
+                <tr class="meal-lunch">
+                    <td>🥩 蛋白质</td>
                     <td>鱼、虾、蛋、豆腐、瘦肉、豆浆</td>
                     <td>补充营养，维持体重</td>
                 </tr>
-                <tr>
-                    <td>碳水化合物</td>
+                <tr class="meal-breakfast">
+                    <td>🍞 碳水化合物</td>
                     <td>米粥、面条、馒头、软米饭</td>
                     <td>提供热量</td>
                 </tr>
-                <tr>
-                    <td>蔬果</td>
+                <tr class="meal-snack-pm">
+                    <td>🥕 蔬果</td>
                     <td>胡萝卜、南瓜、番茄、苹果、香蕉</td>
                     <td>补充维生素、膳食纤维</td>
                 </tr>
-                <tr>
-                    <td>营养补充</td>
+                <tr class="meal-snack-am">
+                    <td>🥤 营养补充</td>
                     <td>肠内营养制剂（安素）、蛋白粉</td>
                     <td>化疗期间营养补充</td>
                 </tr>
@@ -2480,8 +2767,8 @@
 
         </div>
 
-        <!-- 禁忌食物 -->
-        <h3 class="subsection-title">禁忌食物</h3>
+        <!-- 食物禁忌清单（化疗期间严格遵守） -->
+        <h3 class="subsection-title">🚫 食物禁忌清单（化疗期间严格遵守）</h3>
         <div class="table-wrap">
 
             <table>
@@ -2490,36 +2777,65 @@
                     <th>类别</th>
                     <th>禁忌食物</th>
                     <th>原因</th>
+                    <th>⚠️ 本患者特别注意</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>高脂肪</td>
-                    <td>油炸食品、肥肉、奶油</td>
-                    <td>胰腺功能受损，难以消化</td>
+                <tr class="meal-dinner">
+                    <td>🍟 高脂肪</td>
+                    <td>油炸食品、肥肉、奶油、猪油/牛油/黄油、加工肉制品（香肠/培根/午餐肉）、烧烤、煎炸</td>
+                    <td>胰腺功能受损 → 难消化脂肪 → 易腹泻/腹胀</td>
+                    <td>⚠️ <strong>完全避免</strong>（脂肪酶减少+高血压3级）</td>
                 </tr>
-                <tr>
-                    <td>刺激性</td>
-                    <td>辛辣、过酸、过烫食物</td>
-                    <td>刺激消化道，加重不适</td>
+                <tr class="meal-dinner">
+                    <td>🌶️ 刺激性</td>
+                    <td>辛辣（辣椒/胡椒/芥末）、过酸、过烫（&gt;60℃）、酒精</td>
+                    <td>刺激消化道黏膜，加重恶心呕吐</td>
+                    <td>⚠️ <strong>完全避免</strong>（合并乙肝 → 酒精伤肝）</td>
                 </tr>
-                <tr>
-                    <td>粗纤维</td>
-                    <td>粗粮、芹菜、笋、坚果</td>
-                    <td>增加消化负担</td>
+                <tr class="meal-dinner">
+                    <td>🥬 粗纤维</td>
+                    <td>粗粮（糙米/玉米/全谷）、芹菜、笋、韭菜</td>
+                    <td>增加消化负担，易腹胀</td>
+                    <td>⚠️ <strong>限量</strong>（参考上方"膳食纤维"标准）</td>
                 </tr>
-                <tr>
-                    <td>其他</td>
-                    <td>烟酒、咖啡、浓茶</td>
-                    <td>影响恢复</td>
+                <tr class="meal-dinner">
+                    <td>🧂 高盐/腌制</td>
+                    <td>咸菜、腌肉、腊肠、酱菜、酱油过量、加工肉制品</td>
+                    <td>盐分高 + 亚硝酸盐致癌</td>
+                    <td>⚠️ <strong>严格控盐 &lt;5g/天</strong>（高血压3级 + 参考上方"盐摄入"）</td>
+                </tr>
+                <tr class="meal-dinner">
+                    <td>🍬 高糖</td>
+                    <td>甜食、含糖饮料、果汁（即使是"健康"果汁）</td>
+                    <td>体重控制 + 防糖尿病（胰腺功能受损时易血糖波动）</td>
+                    <td>⚠️ <strong>限量</strong>（参考上方"碳水化合物"）</td>
+                </tr>
+                <tr class="meal-dinner">
+                    <td>🚭 烟酒/咖啡因</td>
+                    <td>烟、酒精、咖啡、浓茶、能量饮料、可乐</td>
+                    <td>烟酒明确致癌；咖啡因影响睡眠刺激胃酸</td>
+                    <td>⚠️ <strong>绝对禁忌</strong>（吸烟致胰腺癌；合并乙肝）</td>
                 </tr>
             </tbody>
         </table>
 
         </div>
 
-        <!-- 化疗期间饮食注意事项 -->
-        <h3 class="subsection-title">化疗期间饮食注意事项</h3>
+        <!-- 🚨 化疗期间患者特异性禁忌（特殊警示） -->
+        <div class="alert alert-danger">
+            <strong>🚨 化疗期间患者特异性禁忌（与上方清单互补，更严格）：</strong><br>
+            • <strong>⛔ 生冷食物绝对禁止：</strong>白细胞低（&lt;3.0）或中性粒低（&lt;1.5）时禁食生鱼片、沙拉、半熟蛋、未削皮水果 → 食源性感染风险极高<br>
+            • <strong>⛔ 隔夜食物禁止：</strong>化疗期间免疫力低下，<strong>必须现做现吃</strong><br>
+            • <strong>⛔ 易腹泻水果限量：</strong>西瓜、梨、火龙果、猕猴桃 → 化疗期间肠道敏感易腹泻<br>
+            • <strong>⛔ 牛奶/乳制品注意：</strong>如出现乳糖不耐受（腹胀/腹泻），改喝舒化奶或豆浆替代<br>
+            • <strong>⛔ 蜂王浆/人参等"补品"：</strong>含激素样物质，<strong>化疗期间可能与药物相互作用</strong>，使用前必须咨询主治
+        </div>
+
+        </div>
+
+        <!-- 化疗期间饮食注意事项（独立块，不属于"食物选择指南"） -->
+        <h3 class="subsection-title">⚠️ 化疗期间饮食注意事项</h3>
         <div class="alert">
             <strong>• 恶心呕吐时：</strong>少量多餐，干稀分食，避免空腹<br>
             <strong>• 白细胞低时：</strong>食物彻底加热，不吃生食，水果去皮<br>
@@ -2530,130 +2846,319 @@
         <!-- ========== 一周配餐计划 ========== -->
         <h2 class="section-title">一周配餐计划</h2>
 
-        <h3 class="subsection-title">周一</h3>
+        <div class="day-block">
+        <h3 class="subsection-title"><span class="day-emoji">🌙</span>周一</h3>
         <div class="table-wrap">
 
             <table>
             <thead>
-                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+                <tr><th>餐次</th><th>内容</th><th>克重参考</th><th>说明</th></tr>
             </thead>
             <tbody>
-                <tr><td>早餐</td><td>小米粥 + 蒸蛋 + 小馒头</td><td>清淡易消化</td></tr>
-                <tr><td>辅餐</td><td>温热牛奶 + 苏打饼干</td><td>补充能量</td></tr>
-                <tr><td>午餐</td><td>软面条 + 清蒸鲈鱼 + 炖豆腐 + 碎菜</td><td>优质蛋白（高蛋白低脂）</td></tr>
-                <tr><td>辅餐</td><td>苹果泥 + 营养粉</td><td>维生素+热量</td></tr>
-                <tr><td>晚餐</td><td>大米粥 + 肉末蒸蛋 + 软烂青菜</td><td>晚餐清淡</td></tr>
+                <tr class="meal-breakfast">
+                    <td class="meal-icon-cell">🌅 早餐</td>
+                    <td>小米粥 + 蒸蛋 + 小馒头</td>
+                    <td>约 250g（粥150g+蒸蛋50g+馒头50g）</td>
+                    <td>清淡易消化</td>
+                </tr>
+                <tr class="meal-snack-am">
+                    <td class="meal-icon-cell">☕ 辅餐</td>
+                    <td>温热牛奶 + 苏打饼干</td>
+                    <td>约 220g（牛奶200ml+饼干20g）</td>
+                    <td>补充能量</td>
+                </tr>
+                <tr class="meal-lunch">
+                    <td class="meal-icon-cell">🍚 午餐</td>
+                    <td>软面条 + 清蒸鲈鱼 + 炖豆腐 + 碎菜</td>
+                    <td>约 400g（面100g+鲈鱼100g+豆腐50g+菜150g）</td>
+                    <td>优质蛋白（高蛋白低脂）</td>
+                </tr>
+                <tr class="meal-snack-pm">
+                    <td class="meal-icon-cell">🍎 辅餐</td>
+                    <td>苹果泥 + 营养粉</td>
+                    <td>约 130g（苹果100g+营养粉30g）</td>
+                    <td>维生素+热量</td>
+                </tr>
+                <tr class="meal-dinner">
+                    <td class="meal-icon-cell">🌙 晚餐</td>
+                    <td>大米粥 + 肉末蒸蛋 + 软烂青菜</td>
+                    <td>约 300g（粥150g+肉末50g+蛋50g+菜50g）</td>
+                    <td>晚餐清淡</td>
+                </tr>
             </tbody>
         </table>
 
         </div>
+        </div>
 
-        <h3 class="subsection-title">周二</h3>
+        <div class="day-block">
+        <h3 class="subsection-title"><span class="day-emoji">🌟</span>周二</h3>
         <div class="table-wrap">
 
             <table>
             <thead>
-                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+                <tr><th>餐次</th><th>内容</th><th>克重参考</th><th>说明</th></tr>
             </thead>
             <tbody>
-                <tr><td>早餐</td><td>豆浆 + 肉包子 + 白煮蛋</td><td>植物蛋白</td></tr>
-                <tr><td>辅餐</td><td>酸奶 + 软面包</td><td>益生菌</td></tr>
-                <tr><td>午餐</td><td>软米饭 + 红烧肉末 + 番茄炒蛋 + 冬瓜汤</td><td>开胃易消化</td></tr>
-                <tr><td>辅餐</td><td>香蕉泥 + 安素</td><td>营养补充</td></tr>
-                <tr><td>晚餐</td><td>排骨汤 + 软烂青菜 + 小馒头</td><td>补钙养血（限量，去油）</td></tr>
+                <tr class="meal-breakfast">
+                    <td class="meal-icon-cell">🌅 早餐</td>
+                    <td>豆浆 + 肉包子 + 白煮蛋</td>
+                    <td>约 300g（豆浆200ml+包子2个100g+蛋50g）</td>
+                    <td>植物蛋白</td>
+                </tr>
+                <tr class="meal-snack-am">
+                    <td class="meal-icon-cell">☕ 辅餐</td>
+                    <td>酸奶 + 软面包</td>
+                    <td>约 170g（酸奶100g+面包70g）</td>
+                    <td>益生菌</td>
+                </tr>
+                <tr class="meal-lunch">
+                    <td class="meal-icon-cell">🍚 午餐</td>
+                    <td>软米饭 + 红烧肉末 + 番茄炒蛋 + 冬瓜汤</td>
+                    <td>约 450g（饭100g+肉末50g+蛋50g+冬瓜汤250g）</td>
+                    <td>开胃易消化</td>
+                </tr>
+                <tr class="meal-snack-pm">
+                    <td class="meal-icon-cell">🍎 辅餐</td>
+                    <td>香蕉泥 + 安素</td>
+                    <td>约 200g（香蕉100g+安素55g）</td>
+                    <td>营养补充</td>
+                </tr>
+                <tr class="meal-dinner">
+                    <td class="meal-icon-cell">🌙 晚餐</td>
+                    <td>排骨汤 + 软烂青菜 + 小馒头</td>
+                    <td>约 400g（汤300ml+菜80g+馒头50g）</td>
+                    <td>补钙养血（限量，去油）</td>
+                </tr>
             </tbody>
         </table>
 
         </div>
+        </div>
 
-        <h3 class="subsection-title">周三</h3>
+        <div class="day-block">
+        <h3 class="subsection-title"><span class="day-emoji">🌈</span>周三</h3>
         <div class="table-wrap">
 
             <table>
             <thead>
-                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+                <tr><th>餐次</th><th>内容</th><th>克重参考</th><th>说明</th></tr>
             </thead>
             <tbody>
-                <tr><td>早餐</td><td>南瓜粥 + 蒸红薯 + 蛋白</td><td>粗粮细做</td></tr>
-                <tr><td>辅餐</td><td>温豆浆 + 饼干</td><td>简单补充</td></tr>
-                <tr><td>午餐</td><td>鸡丝面 + 水煮虾 + 豆腐 + 清炒西兰花</td><td>高蛋白低脂</td></tr>
-                <tr><td>辅餐</td><td>梨泥 + 蛋白粉</td><td>润肺补充</td></tr>
-                <tr><td>晚餐</td><td>山药粥 + 鱼肉丸 + 烂面条</td><td>健脾养胃</td></tr>
+                <tr class="meal-breakfast">
+                    <td class="meal-icon-cell">🌅 早餐</td>
+                    <td>南瓜粥 + 蒸红薯 + 蛋白</td>
+                    <td>约 300g（南瓜粥150g+红薯100g+蛋白50g）</td>
+                    <td>粗粮细做</td>
+                </tr>
+                <tr class="meal-snack-am">
+                    <td class="meal-icon-cell">☕ 辅餐</td>
+                    <td>温豆浆 + 饼干</td>
+                    <td>约 230g（豆浆200ml+饼干30g）</td>
+                    <td>简单补充</td>
+                </tr>
+                <tr class="meal-lunch">
+                    <td class="meal-icon-cell">🍚 午餐</td>
+                    <td>鸡丝面 + 水煮虾 + 豆腐 + 清炒西兰花</td>
+                    <td>约 450g（面100g+鸡丝50g+虾50g+豆腐50g+西兰花150g）</td>
+                    <td>高蛋白低脂</td>
+                </tr>
+                <tr class="meal-snack-pm">
+                    <td class="meal-icon-cell">🍎 辅餐</td>
+                    <td>梨泥 + 蛋白粉</td>
+                    <td>约 150g（梨100g+蛋白粉30g）</td>
+                    <td>润肺补充</td>
+                </tr>
+                <tr class="meal-dinner">
+                    <td class="meal-icon-cell">🌙 晚餐</td>
+                    <td>山药粥 + 鱼肉丸 + 烂面条</td>
+                    <td>约 350g（山药粥150g+鱼丸50g+面50g）</td>
+                    <td>健脾养胃</td>
+                </tr>
             </tbody>
         </table>
 
         </div>
+        </div>
 
-        <h3 class="subsection-title">周四</h3>
+        <div class="day-block">
+        <h3 class="subsection-title"><span class="day-emoji">💪</span>周四</h3>
         <div class="table-wrap">
 
             <table>
             <thead>
-                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+                <tr><th>餐次</th><th>内容</th><th>克重参考</th><th>说明</th></tr>
             </thead>
             <tbody>
-                <tr><td>早餐</td><td>牛奶 + 面包 + 荷包蛋</td><td>常规搭配</td></tr>
-                <tr><td>辅餐</td><td>果汁 + 小蛋糕</td><td>开胃</td></tr>
-                <tr><td>午餐</td><td>软米饭 + 蒸肉饼 + 蒸蛋 + 青菜</td><td>家常易消化</td></tr>
-                <tr><td>辅餐</td><td>酸奶 + 水果泥</td><td>调节肠道</td></tr>
-                <tr><td>晚餐</td><td>小米粥 + 鸽子汤 + 软饼</td><td>化疗前高蛋白补充</td></tr>
+                <tr class="meal-breakfast">
+                    <td class="meal-icon-cell">🌅 早餐</td>
+                    <td>牛奶 + 面包 + 荷包蛋</td>
+                    <td>约 280g（牛奶200ml+面包80g+蛋50g）</td>
+                    <td>常规搭配</td>
+                </tr>
+                <tr class="meal-snack-am">
+                    <td class="meal-icon-cell">☕ 辅餐</td>
+                    <td>果汁 + 小蛋糕</td>
+                    <td>约 200g（果汁150ml+蛋糕50g）</td>
+                    <td>开胃</td>
+                </tr>
+                <tr class="meal-lunch">
+                    <td class="meal-icon-cell">🍚 午餐</td>
+                    <td>软米饭 + 蒸肉饼 + 蒸蛋 + 青菜</td>
+                    <td>约 450g（饭100g+肉饼80g+蒸蛋50g+菜150g）</td>
+                    <td>家常易消化</td>
+                </tr>
+                <tr class="meal-snack-pm">
+                    <td class="meal-icon-cell">🍎 辅餐</td>
+                    <td>酸奶 + 水果泥</td>
+                    <td>约 200g（酸奶100g+水果100g）</td>
+                    <td>调节肠道</td>
+                </tr>
+                <tr class="meal-dinner">
+                    <td class="meal-icon-cell">🌙 晚餐</td>
+                    <td>小米粥 + 鸽子汤 + 软饼</td>
+                    <td>约 400g（粥150g+汤250ml+软饼50g）</td>
+                    <td>化疗前高蛋白补充</td>
+                </tr>
             </tbody>
         </table>
 
         </div>
+        </div>
 
-        <h3 class="subsection-title">周五</h3>
+        <div class="day-block">
+        <h3 class="subsection-title"><span class="day-emoji">🍀</span>周五</h3>
         <div class="table-wrap">
 
             <table>
             <thead>
-                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+                <tr><th>餐次</th><th>内容</th><th>克重参考</th><th>说明</th></tr>
             </thead>
             <tbody>
-                <tr><td>早餐</td><td>燕麦粥 + 包子 + 蛋羹</td><td>粗细搭配</td></tr>
-                <tr><td>辅餐</td><td>坚果粉糊 + 饼干</td><td>热量补充</td></tr>
-                <tr><td>午餐</td><td>面条 + 番茄炖牛肉 + 炒嫩南瓜</td><td>补铁养血</td></tr>
-                <tr><td>辅餐</td><td>苹果泥 + 营养棒</td><td>能量补充</td></tr>
-                <tr><td>晚餐</td><td>蔬菜粥 + 鱼肉松 + 蒸土豆</td><td>软烂为主</td></tr>
+                <tr class="meal-breakfast">
+                    <td class="meal-icon-cell">🌅 早餐</td>
+                    <td>燕麦粥 + 包子 + 蛋羹</td>
+                    <td>约 280g（燕麦粥150g+包子2个80g+蛋羹50g）</td>
+                    <td>粗细搭配</td>
+                </tr>
+                <tr class="meal-snack-am">
+                    <td class="meal-icon-cell">☕ 辅餐</td>
+                    <td>坚果粉糊 + 饼干</td>
+                    <td>约 80g（坚果粉30g+饼干50g）</td>
+                    <td>热量补充</td>
+                </tr>
+                <tr class="meal-lunch">
+                    <td class="meal-icon-cell">🍚 午餐</td>
+                    <td>面条 + 番茄炖牛肉 + 炒嫩南瓜</td>
+                    <td>约 450g（面100g+牛肉80g+番茄50g+南瓜150g）</td>
+                    <td>补铁养血</td>
+                </tr>
+                <tr class="meal-snack-pm">
+                    <td class="meal-icon-cell">🍎 辅餐</td>
+                    <td>苹果泥 + 营养棒</td>
+                    <td>约 150g（苹果100g+营养棒50g）</td>
+                    <td>能量补充</td>
+                </tr>
+                <tr class="meal-dinner">
+                    <td class="meal-icon-cell">🌙 晚餐</td>
+                    <td>蔬菜粥 + 鱼肉松 + 蒸土豆</td>
+                    <td>约 350g（菜粥150g+鱼肉松50g+土豆100g）</td>
+                    <td>软烂为主</td>
+                </tr>
             </tbody>
         </table>
 
         </div>
+        </div>
 
-        <h3 class="subsection-title">周六</h3>
+        <div class="day-block">
+        <h3 class="subsection-title"><span class="day-emoji">🌞</span>周六</h3>
         <div class="table-wrap">
 
             <table>
             <thead>
-                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+                <tr><th>餐次</th><th>内容</th><th>克重参考</th><th>说明</th></tr>
             </thead>
             <tbody>
-                <tr><td>早餐</td><td>豆浆 + 油条（少油）+ 茶叶蛋</td><td>传统早餐</td></tr>
-                <tr><td>辅餐</td><td>牛奶 + 软面包</td><td>常规补充</td></tr>
-                <tr><td>午餐</td><td>软米饭 + 清蒸鳕鱼 + 炖萝卜 + 蛋花汤</td><td>高蛋白低脂（与周一鲈鱼轮换）</td></tr>
-                <tr><td>辅餐</td><td>橙子泥 + 安素</td><td>维生素C</td></tr>
-                <tr><td>晚餐</td><td>饺子（鱼肉馅）+ 稀粥</td><td>变换口味</td></tr>
+                <tr class="meal-breakfast">
+                    <td class="meal-icon-cell">🌅 早餐</td>
+                    <td>豆浆 + 油条（少油）+ 茶叶蛋</td>
+                    <td>约 280g（豆浆200ml+油条1根30g+蛋50g）</td>
+                    <td>传统早餐</td>
+                </tr>
+                <tr class="meal-snack-am">
+                    <td class="meal-icon-cell">☕ 辅餐</td>
+                    <td>牛奶 + 软面包</td>
+                    <td>约 270g（牛奶200ml+面包70g）</td>
+                    <td>常规补充</td>
+                </tr>
+                <tr class="meal-lunch">
+                    <td class="meal-icon-cell">🍚 午餐</td>
+                    <td>软米饭 + 清蒸鳕鱼 + 炖萝卜 + 蛋花汤</td>
+                    <td>约 450g（饭100g+鳕鱼100g+萝卜50g+蛋花汤200ml）</td>
+                    <td>高蛋白低脂（与周一鲈鱼轮换）</td>
+                </tr>
+                <tr class="meal-snack-pm">
+                    <td class="meal-icon-cell">🍎 辅餐</td>
+                    <td>橙子泥 + 安素</td>
+                    <td>约 200g（橙子100g+安素55g）</td>
+                    <td>维生素C</td>
+                </tr>
+                <tr class="meal-dinner">
+                    <td class="meal-icon-cell">🌙 晚餐</td>
+                    <td>饺子（鱼肉馅）+ 稀粥</td>
+                    <td>约 350g（饺子12个约240g+粥100g）</td>
+                    <td>变换口味</td>
+                </tr>
             </tbody>
         </table>
 
         </div>
+        </div>
 
-        <h3 class="subsection-title">周日</h3>
+        <div class="day-block">
+        <h3 class="subsection-title"><span class="day-emoji">🌸</span>周日</h3>
         <div class="table-wrap">
 
             <table>
             <thead>
-                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+                <tr><th>餐次</th><th>内容</th><th>克重参考</th><th>说明</th></tr>
             </thead>
             <tbody>
-                <tr><td>早餐</td><td>红枣粥 + 鸡蛋饼 + 小米糕</td><td>补血养气</td></tr>
-                <tr><td>辅餐</td><td>酸奶 + 水果泥</td><td>调节口味</td></tr>
-                <tr><td>午餐</td><td>软米饭 + 泥鳅汤 + 炒丝瓜</td><td>高蛋白低脂，养胃补益</td></tr>
-                <tr><td>辅餐</td><td>核桃糊 + 饼干</td><td>健脑补脑</td></tr>
-                <tr><td>晚餐</td><td>白粥 + 肉松 + 蒸南瓜</td><td>简单养胃</td></tr>
+                <tr class="meal-breakfast">
+                    <td class="meal-icon-cell">🌅 早餐</td>
+                    <td>红枣粥 + 鸡蛋饼 + 小米糕</td>
+                    <td>约 300g（粥150g+饼50g+小米糕50g）</td>
+                    <td>补血养气</td>
+                </tr>
+                <tr class="meal-snack-am">
+                    <td class="meal-icon-cell">☕ 辅餐</td>
+                    <td>酸奶 + 水果泥</td>
+                    <td>约 200g（酸奶100g+水果100g）</td>
+                    <td>调节口味</td>
+                </tr>
+                <tr class="meal-lunch">
+                    <td class="meal-icon-cell">🍚 午餐</td>
+                    <td>软米饭 + 泥鳅汤 + 炒丝瓜</td>
+                    <td>约 450g（饭100g+泥鳅汤300ml含肉80g+丝瓜150g）</td>
+                    <td>高蛋白低脂，养胃补益</td>
+                </tr>
+                <tr class="meal-snack-pm">
+                    <td class="meal-icon-cell">🍎 辅餐</td>
+                    <td>核桃糊 + 饼干</td>
+                    <td>约 100g（核桃糊30g+饼干70g）</td>
+                    <td>健脑补脑</td>
+                </tr>
+                <tr class="meal-dinner">
+                    <td class="meal-icon-cell">🌙 晚餐</td>
+                    <td>白粥 + 肉松 + 蒸南瓜</td>
+                    <td>约 350g（粥150g+肉松30g+南瓜150g）</td>
+                    <td>简单养胃</td>
+                </tr>
             </tbody>
         </table>
 
+        </div>
         </div>
     </div>
 
@@ -2681,8 +3186,9 @@
             </div>
         </div>
 
-        <!-- 费用汇总明细（表格形式） -->
-        <h3 class="subsection-title">费用结构明细</h3>
+        <!-- 费用结构明细（独立虚线框） -->
+        <div class="module-block">
+        <h3 class="subsection-title">📊 费用结构明细</h3>
         <div class="table-wrap">
 
             <table>
@@ -2730,13 +3236,24 @@
 
         </div>
 
+        </div>
+
         <!-- 费用明细（按日期追溯） -->
+        <div class="module-block">
         <h2 class="section-title">费用明细</h2>
+        <div class="alert" style="font-size: 12px; padding: 8px 12px;">
+            <strong>🏷 标记说明：</strong>
+            <span class="row-marker row-marker-gray"></span><strong>灰色</strong>= 常规门诊（检查/挂号/换药/复诊/基因检测）
+            <span class="row-marker row-marker-green" style="margin-left: 12px;"></span><strong>绿色</strong>= 化疗门诊（华山医院化疗当日）
+            <span class="row-marker row-marker-blue" style="margin-left: 12px;"></span><strong>蓝色</strong>= 住院（华山医院住院期间）
+        </div>
         <div class="table-wrap">
 
             <table>
             <thead>
                 <tr>
+                        <th>#</th>
+                        <th>标记</th>
                         <th>日期</th>
                     <th>类型</th>
                     <th>医院</th>
@@ -2747,7 +3264,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">1</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-02</td>
                     <td>门诊</td>
                     <td>盐城第一人民医院</td>
@@ -2756,7 +3275,9 @@
                     <td>¥6,300.00</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-hospital">
+                    <td class="numeric">2</td>
+                    <td><span class="row-marker row-marker-blue" title="住院"></span></td>
                     <td>2026-07-09~16</td>
                     <td>住院</td>
                     <td>华山医院</td>
@@ -2765,7 +3286,9 @@
                     <td>¥6,663.31</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">3</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-20</td>
                     <td>门诊</td>
                     <td>华山医院</td>
@@ -2774,7 +3297,9 @@
                     <td>¥735.93</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">4</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-20</td>
                     <td>门诊</td>
                     <td>广州迈景基因医学科技有限公司</td>
@@ -2783,7 +3308,9 @@
                     <td>¥10,500.00</td>
                     <td class="status-cell">✓ 报告 07-29 已出具（编号 MG2625660151）+ 发票 07-30 已开具（号码 26442000008711772001）</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">5</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-20</td>
                     <td>门诊</td>
                     <td>长海医院</td>
@@ -2792,7 +3319,9 @@
                     <td>¥58.15</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">6</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-21</td>
                     <td>门诊</td>
                     <td>长海医院</td>
@@ -2801,7 +3330,9 @@
                     <td>¥75.25</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">7</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-22</td>
                     <td>门诊</td>
                     <td>长海医院</td>
@@ -2810,7 +3341,9 @@
                     <td>¥14.05</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">8</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-22</td>
                     <td>门诊</td>
                     <td>长海医院</td>
@@ -2819,7 +3352,9 @@
                     <td>¥30.47</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">9</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-22</td>
                     <td>门诊</td>
                     <td>长海医院</td>
@@ -2828,7 +3363,9 @@
                     <td>¥23.85</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-chemo">
+                    <td class="numeric">10</td>
+                    <td><span class="row-marker row-marker-green" title="化疗门诊"></span></td>
                     <td>2026-07-23</td>
                     <td>门诊</td>
                     <td>华山医院</td>
@@ -2837,7 +3374,9 @@
                     <td>¥2,758.29</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">11</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-25</td>
                     <td>门诊</td>
                     <td>长海医院</td>
@@ -2846,7 +3385,9 @@
                     <td>¥13.60</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">12</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-07-28</td>
                     <td>门诊</td>
                     <td>长海医院</td>
@@ -2855,7 +3396,9 @@
                     <td>¥44.64</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-chemo">
+                    <td class="numeric">13</td>
+                    <td><span class="row-marker row-marker-green" title="化疗门诊"></span></td>
                     <td>2026-07-30</td>
                     <td>门诊</td>
                     <td>华山医院</td>
@@ -2864,7 +3407,9 @@
                     <td>¥405.18</td>
                     <td class="status-cell">✅ 已完成</td>
                 </tr>
-                <tr>
+                <tr class="row-outpatient">
+                    <td class="numeric">14</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-08-11</td>
                     <td>门诊</td>
                     <td>长海医院</td>
@@ -2873,7 +3418,9 @@
                     <td>¥73.35</td>
                     <td class="status-cell">✅ 已完成（CA19-9 139.42 接近基准 ✅；骨髓抑制波动期）</td>
                 </tr>
-                <tr class="highlight">
+                <tr class="row-chemo highlight">
+                    <td class="numeric">15</td>
+                    <td><span class="row-marker row-marker-green" title="化疗门诊"></span></td>
                     <td>2026-08-13</td>
                     <td>门诊</td>
                     <td>华山医院</td>
@@ -2882,7 +3429,9 @@
                     <td>¥2,724.85</td>
                     <td class="status-cell">✅ 已完成（含全自费药品告知：曲拉西利+多烯磷脂酰胆碱+艾贝格司亭α）</td>
                 </tr>
-                <tr class="highlight">
+                <tr class="row-outpatient">
+                    <td class="numeric">16</td>
+                    <td><span class="row-marker row-marker-gray" title="常规门诊"></span></td>
                     <td>2026-08-18</td>
                     <td>门诊</td>
                     <td>长海医院</td>
@@ -2891,8 +3440,8 @@
                     <td>¥30.44</td>
                     <td class="status-cell">✅ 已完成（CA19-9 79.24 化疗显著有效✅；医保统筹覆盖 ¥197.52，自付 ¥0）</td>
                 </tr>
-                <tr class="highlight">
-                    <td colspan="4" style="text-align: right;"><strong>💰 累计总费用（含基因检测）：</strong></td>
+                <tr>
+                    <td colspan="5" style="text-align: right;"><strong>💰 累计总费用（含基因检测）：</strong></td>
                     <td><strong>¥56,684.39</strong></td>
                     <td><strong>¥30,541.31</strong></td>
                     <td>医保统筹 ¥26,143.08（~46.1%）</td>
@@ -2900,6 +3449,7 @@
             </tbody>
         </table>
 
+        </div>
         </div>
     </div>
 
@@ -2909,11 +3459,11 @@
         <!-- ========== 重要提醒 ========== -->
         <h2 class="section-title">重要提醒</h2>
         <div class="alert alert-danger">
-            <strong>⚠ 乙型肝炎：</strong>患者有乙肝病史，化疗期间需密切监测肝功能，化疗前需抗病毒治疗
+            <strong>⚠️ 乙型肝炎：</strong>患者有乙肝病史，化疗期间需密切监测肝功能，化疗前需抗病毒治疗
         </div>
         <!-- ===== 关键监测指标：CA19-9 临床意义（CSCO 5.2 节） ===== -->
             <div class="alert">
-            <strong>⚠ CA19-9监测（CSCO 2024 指南 5.2 节）：</strong><br>
+            <strong>⚠️ CA19-9监测（CSCO 2024 指南 5.2 节）：</strong><br>
             • 正常参考上限 <strong>37 U/mL</strong>，在特定筛查场景下灵敏度/特异度可达 90% 以上（受胆道梗阻、炎症、Lewis 抗原状态影响）<br>
             • <strong>本患者趋势：</strong>化疗后一过性升高（07-21: 317.8 → 07-28: 190.46 → 08-11: 139.42 → <strong>08-18: 79.24</strong>，<strong>化疗显著有效 ✅</strong>）<br>
             • <strong>化疗后一过性升高机制：</strong>肿瘤细胞坏死后释放 CA19-9 进入血液，<strong>可能提示治疗反应</strong>；本患者持续下降趋势提示化疗明确有效，但<strong>不能单独确认疗效</strong><br>
@@ -2922,27 +3472,27 @@
             • 部分人群（约 5-10%）因 Lewis 抗原阴性而无法有效表达 CA19-9，此类患者<strong>可能持续不升高</strong>，不能排除肿瘤
         </div>
         <div class="alert">
-            <strong>⚠ 血红蛋白（持续偏低，但已回升）：</strong><br>
+            <strong>⚠️ 血红蛋白（持续偏低，但已回升）：</strong><br>
             • <strong>趋势：</strong>94 → 90 → 96 g/L（08-11）→ <strong>102 g/L（08-18，+6g/L 略回升）</strong>，仍低于下限 115<br>
             • <strong>红细胞：</strong>3.11↓（08-11）→ 3.24↓（08-18），参考 3.8-5.1<br>
             • <strong>红细胞分布宽度：</strong>CV 16.7↑ + SD 56.9↑（提示红细胞大小不均，可能为缺铁或骨髓恢复期表现）<br>
             • <strong>建议：</strong>加强营养（动物肝脏/瘦肉/深色蔬菜/蛋白粉）+ 铁剂（硫酸亚铁缓释片）
         </div>
         <div class="alert">
-            <strong>⚠ 白细胞+中性粒细胞（化疗间歇期骨髓抑制波动期）：</strong><br>
-            • <strong>当前（08-11 化疗前）：</strong>WBC <strong>3.23↓</strong>（参考 3.5-9.5）+ 中性粒 <strong>1.38↓</strong>（参考 1.8-6.3）<br>
-            • <strong>08-18 化疗后第 5 天：</strong>WBC <strong>26.13↑</strong> + 中性粒 <strong>15.68↑</strong>（升白针艾贝格司亭α作用，<strong>骨髓抑制已恢复 ✅</strong>）<br>
+            <strong>⚠️ 白细胞+中性粒细胞（化疗间歇期骨髓抑制波动期）：</strong><br>
+            • <strong>当前（08-11 化疗前）：</strong>白细胞 <strong>3.23↓</strong>（参考 3.5-9.5）+ 中性粒细胞 <strong>1.38↓</strong>（参考 1.8-6.3）<br>
+            • <strong>08-18 化疗后第 5 天：</strong>白细胞 <strong>26.13↑</strong> + 中性粒细胞 <strong>15.68↑</strong>（升白针艾贝格司亭α作用，<strong>骨髓抑制已恢复 ✅</strong>）<br>
             • <strong>典型规律：</strong>化疗后 7-10 天为最低点，14-21 天逐步恢复<br>
-            • <strong>建议：</strong>化疗前复查血常规，确保 WBC≥3.0、中性粒≥1.5 方可安全给药；08-13 已用艾贝格司亭α 预防性升白
+            • <strong>建议：</strong>化疗前复查血常规，确保白细胞≥3.0、中性粒细胞≥1.5 方可安全给药；08-13 已用艾贝格司亭α 预防性升白
         </div>
         <!-- ===== 用药警示：塞来昔布 COX-2 抑制剂 5 维警告 ===== -->
             <div class="alert">
             <strong>💊 塞来昔布（西乐葆，COX-2 抑制剂）使用注意：</strong><br>
             • 用途：缓解癌性疼痛 + 肌肉骨骼酸痛（已开始服用）<br>
-            • <strong>⚠ 相互作用：</strong>可能与化疗药（特别是吉西他滨/卡培他滨）相互作用，长期联用需主治评估<br>
-            • <strong>⚠ 心血管风险：</strong>COX-2 抑制剂可增加血栓/心血管事件风险，胰腺癌患者 VTE 风险本就高（CSCO 指南 VTE 发生率 27%），需密切观察<br>
-            • <strong>⚠ 胃肠道：</strong>可引起胃部不适/溃疡，与化疗止吐药同用时注意<br>
-            • <strong>⚠ 肝肾：</strong>本患者有乙肝病史，需监测肝功能；如出现水肿/尿量变化及时告知主治<br>
+            • <strong>⚠️ 相互作用：</strong>可能与化疗药（特别是吉西他滨/卡培他滨）相互作用，长期联用需主治评估<br>
+            • <strong>⚠️ 心血管风险：</strong>COX-2 抑制剂可增加血栓/心血管事件风险，胰腺癌患者 VTE 风险本就高（CSCO 指南 VTE 发生率 27%），需密切观察<br>
+            • <strong>⚠️ 胃肠道：</strong>可引起胃部不适/溃疡，与化疗止吐药同用时注意<br>
+            • <strong>⚠️ 肝肾：</strong>本患者有乙肝病史，需监测肝功能；如出现水肿/尿量变化及时告知主治<br>
             • <strong>不宜长期使用</strong>，症状缓解后应在主治指导下停药或减量
         </div>
         <div class="alert alert-info">
@@ -2955,32 +3505,33 @@
             • <strong>胚系 92 基因阴性</strong> → 家族史（姐姐乳腺癌）非胚系来源；仍建议家族女性乳腺/卵巢年度体检<br>
             • <strong>主线仍是 AG 方案化疗</strong>（08-11 CA19-9 降至 139.42 接近基准，08-18 进一步降至 79.24 < 100，<strong>化疗显著有效</strong>），基因结果主要用于<strong>未来二线/维持/临床试验</strong>方向；<strong>✅ 08-11 与主治讨论已完成</strong>（维持治疗+KRAS G12D 试验入组+CBL 高丰度随访），详见下方"08-11 解读"
         </div>
-        <!-- ===== 08-18 检查指标解读（重点：CA19-9 显著下降 + 升白针作用 + eGFR G2 期） ===== -->
+        <!-- ===== 08-18 检查指标解读（重点：CA19-9 显著下降 + 升白针作用 + 估算肾小球滤过率 G2 期） ===== -->
             <div class="alert alert-success">
             <strong>📊 08-18 检查指标解读（化疗后第 5 天，疗效明确）：</strong><br>
             <strong>✅ CA19-9 显著下降至 &lt;100，化疗明确有效：</strong><br>
             　• 趋势：131（基准）→ 317.8（化疗后一过性 ↑）→ 190.46（↓40%）→ 139.42（08-11，接近基准）→ <strong>79.24（08-18，↓43%，首次 &lt;100 🎉）</strong><br>
             　• <strong>提示 AG 方案对本患者高度敏感，可继续 6 周期完整化疗</strong><br>
             <strong>🟢 骨髓抑制已恢复（升白针预防性给药成功）：</strong><br>
-            　• WBC 26.13↑（升白针艾贝格司亭α 08-13 化疗当日预防性给药，化疗后第 5 天达峰）<br>
-            　• 中性粒 15.68↑ + PLT 301（正常）<br>
+            　• 白细胞 26.13↑（升白针艾贝格司亭α 08-13 化疗当日预防性给药，化疗后第 5 天达峰）<br>
+            　• 中性粒细胞 15.68↑ + 血小板 301（正常）<br>
             　• <strong>升白针保护作用明确，本次化疗未出现严重骨髓抑制 ✅</strong><br>
             <strong>• 血红蛋白（102 g/L）：</strong>较 08-11 的 96 g/L 回升 +6 g/L，<strong>轻度贫血逐步改善</strong>，但仍<strong>低于下限 115</strong>，建议加强营养<br>
             <strong>• 红细胞（3.24×10¹²/L）：</strong>较 08-11 的 3.11 略升，符合<strong>贫血恢复早期表现</strong><br>
             <strong>🟡 其他指标关注：</strong><br>
             　• ALT 6↓（持平）+ AST 17（正常）+ 钾 3.7（较 08-11 的 3.5 改善 ✅）<br>
             　• <strong>前白蛋白 165↓</strong>（营养指标偏低）<br>
-            　• <strong>LDH 333↑</strong>（肿瘤负荷指标，需结合影像）<br>
+            　• <strong>乳酸脱氢酶 333↑</strong>（肿瘤负荷指标，需结合影像）<br>
             　• 总胆汁酸 2.3（正常）+ 总蛋白 70 + 白蛋白 43（正常）<br>
-            <strong>⚠ eGFR 89.48（G2 期）需关注：</strong><br>
+            <strong>⚠️ 估算肾小球滤过率 89.48（G2 期）需关注：</strong><br>
             　• 较 08-11 的 111.51 下降，<strong>从 G1 期（≥90）降至 G2 期（60-89，轻度肾功下降）</strong><br>
             　• 肌酐 65 正常。可能与化疗药肾毒性 + 营养状态有关<br>
             　• <strong>建议：</strong>化疗前复查肾功能 + 充分水化<br>
             <strong>📌 08-18 检查小结：</strong><br>
             　① <strong>CA19-9 显著下降</strong>，AG 方案疗效明确，可继续<br>
             　② <strong>骨髓抑制已恢复</strong>，升白针预防成功<br>
-            　③ <strong>eGFR G2 期</strong>需关注（化疗药代谢负担）<br>
+            　③ <strong>估算肾小球滤过率 G2 期</strong>需关注（化疗药代谢负担）<br>
             　④ <strong>恩替卡韦30片</strong> 已开具（乙肝抗病毒持续治疗）
+        </div>
         <!-- ===== 08-11 检查指标解读（重点：骨髓抑制+白细胞+血红蛋白+红细胞） ===== -->
             <div class="alert alert-warning">
             <strong>📊 08-11 检查指标解读（关键节点，已与主治讨论）：</strong><br>
@@ -2988,7 +3539,7 @@
             　• 趋势：131（基准）→ 317.8（化疗后一过性 ↑）→ 190.46（↓40%）→ <strong>139.42（08-11，接近基准 ↓）</strong><br>
             　• <strong>提示 AG 方案对本患者疗效明确</strong>，建议继续当前方案<br>
             <strong>🟡 骨髓抑制波动期（化疗间歇期典型表现）：</strong><br>
-            　• 复查：WBC 3.23↓ + 中性粒 1.38↓ + HGB 96↓ + RBC 3.11↓<br>
+            　• 复查：白细胞 3.23↓ + 中性粒细胞 1.38↓ + 血红蛋白 96↓ + 红细胞 3.11↓<br>
             　• <strong>符合化疗间歇期第 12 天骨髓恢复不充分表现</strong>（07-30 第三次化疗 → 08-11 仅 12 天）<br>
             　• <strong>典型规律：</strong>化疗后 7-10 天为最低点，14-21 天逐步恢复<br>
             <strong>• 白细胞（3.23×10⁹/L）：</strong>较 07-28 的 13.44（恢复期代偿性升高）已显著回落，但未回升至正常下限以上。<strong>化疗前需确保 ≥3.0 方可安全给药</strong>（目前临界）<br>
@@ -2997,12 +3548,12 @@
             <strong>• 红细胞（3.11×10¹²/L）：</strong>符合<strong>轻度贫血</strong>表现；<strong>红细胞分布宽度 CV 16.8↑ + SD 55.4↑</strong>，提示<strong>红细胞大小不均</strong>（可能为缺铁或骨髓恢复期表现）<br>
             <strong>🟢 其他指标良好：</strong><br>
             　• ALT 6（略低）+ AST 17（正常）肝功能稳定<br>
-            　• <strong>eGFR 111.51（G1 期）</strong>肾功能良好<br>
+            　• <strong>估算肾小球滤过率 111.51（G1 期）</strong>肾功能良好<br>
             　• CA724 1.91 + CEA 1.43（均正常）<br>
             　• <strong>钾 3.5（临界下限）</strong>建议食补（香蕉/土豆/菠菜）<br>
             <strong>📌 08-11 与主治讨论重点（已完成）：</strong><br>
             　① <strong>CA19-9 持续下降</strong>，AG 方案有效，可继续<br>
-            　② <strong>当前骨髓抑制需评估是否需要升白针预防</strong>（第二疗程前中性粒偏低，必要时硫培非格司亭）<br>
+            　② <strong>当前骨髓抑制需评估是否需要升白针预防</strong>（第二疗程·第1次化疗前中性粒细胞偏低，必要时硫培非格司亭）<br>
             　③ <strong>维持治疗方向</strong>（替吉奥 S-1 / AG 低剂量，待 09-03 评估后定）<br>
             　④ <strong>KRAS G12D 临床试验入组可行性</strong>（关注 Daraxonrasib / IMM-1-104 / NCT05379985 等）
         </div>
@@ -3020,26 +3571,27 @@
         <div class="alert">
             <strong>📋 待完成：</strong><br>
             • 每次化疗后及时更新指标数据<br>
-            • ~~<strong>08-11 化疗前检查时与主治讨论</strong>~~ → ✅ <strong>已完成（08-11）</strong>：讨论 KRAS G12D 试验入组 + 维持治疗 + CBL 随访；详细结果见上方"08-11 解读"区块<br>
-            • ~~<strong>08-13 化疗前复查血常规</strong>~~ → ✅ <strong>已完成（08-13）</strong>：化疗已完成，本次开具升白针（艾贝格司亭α）预防性升白<br>
-            • ~~<strong>08-18 化疗前检查</strong>~~ → ✅ <strong>已完成（08-18）</strong>：CA19-9 显著下降至 79.24（化疗显著有效✅），骨髓抑制已恢复；详见上方"08-18 解读"区块<br>
-            • <strong>08-20 第二疗程·第2次化疗</strong>（华山医院）<br>
+            • <strong>08-20 第二疗程·第2次化疗</strong>（华山医院，第5次化疗）<br>
             • <strong>8 月底前：</strong>在 ClinicalTrials.gov / ChiCTR / 各大医院官网搜索 KRAS G12D + 胰腺癌国内试验（重点关注北京/上海/广州三甲医院）<br>
             • 关注 KRAS G12D 胰腺癌靶向药进展（FDA/NMPA 审批动态，如 Daraxonrasib 2023 ESMO PDAC ORR 20%）<br>
             • <strong>09-03 增强 CT 评估</strong>（关键决策点：手术 vs 继续化疗）
         </div>
     </div>
 
-    <div class="alert alert-info" style="font-size: 12px; padding: 8px 12px; margin-top: 30px;">
-        <strong>💡 使用说明：</strong>点击顶部标签按钮切换板块（指标趋势 / 治疗时间线 / 化疗方案 / 饮食计划 / 费用记录 / 注意事项）。在手机或平板上，表格可左右滑动查看全部列。
+    <!-- 💡 使用说明 -->
+    <div class="alert alert-info" style="font-size: 13px; padding: 14px 18px; margin: 30px 0 10px; border-left: 4px solid #2c7873;">
+        <strong>💡 使用说明：</strong><br>
+        • <strong>切换板块：</strong>点击顶部标签按钮（指标趋势 / 治疗时间线 / 化疗方案 / 饮食计划 / 费用记录 / 注意事项）<br>
+        • <strong>手机/平板：</strong>表格可左右滑动查看全部列<br>
+        • <strong>异常标识：</strong>指标数值后 ↑↓ 表示超出参考范围；状态列的 ✅/📋/⏳ 表示完成/计划/待定
     </div>
 
     <div class="timestamp">
-        <strong>最后更新 · 2026-08-18</strong>（✅ 08-18 第二疗程·第1次化疗前检查已完成（CA19-9 79.24 ↓43% <100 化疗显著有效✅；骨髓抑制已恢复+升白针作用明确；eGFR 89.48 G2 期需关注）| 08-13 第二疗程·第1次化疗已完成 | 指标数据更新至第5行（08-18 新增） | 新增 08-18 解读区块 | 费用：¥227.96（医保统筹¥197.52 + 个人账户¥30.44）| 累计 ¥56,684.43（医保统筹 ¥26,143.08 + 个人 ¥30,541.31））
+        <strong>最后更新 · 2026-08-19</strong>（✅ 08-18 第二疗程·第2次化疗前检查已完成（CA19-9 79.24 ↓43% <100 化疗显著有效✅；骨髓抑制已恢复+升白针作用明确；估算肾小球滤过率 89.48 G2 期需关注）| 08-13 第二疗程·第1次化疗已完成 | 指标数据更新至第5行（08-18 新增） | 新增 08-18 解读区块 | 费用：¥227.96（医保统筹¥197.52 + 个人账户¥30.44）| 累计 ¥56,684.39（医保统筹 ¥26,143.08 + 个人 ¥30,541.31）| 全面修订：指标趋势图表加正常范围虚线、英文本地化、费用明细表加序号+三色标记、饮食计划增加克重+禁忌分类）
         <details style="margin-top:6px;">
             <summary style="cursor:pointer;color:#1a5f7a;">查看历史更新</summary>
             <div style="margin-top:6px;padding:8px;background:#f8f9fa;border-radius:4px;">
-                <strong>2026-08-18（08-18检查入档）</strong>：08-18 第二疗程·第1次化疗前检查记录入档 | 关键指标：CA19-9 79.24（↓43% <100，化疗显著有效✅）；WBC 26.13↑ + 中性粒 15.68↑（升白针艾贝格司亭α作用）；HGB 102 + RBC 3.24（轻度贫血改善）；eGFR 89.48 G2 期；ALT 6 + AST 17；LDH 333↑ | 费用：挂号 ¥25 + 检查 ¥202.96 = ¥227.96（医保统筹¥197.52 + 个人账户¥30.44）| 累计 ¥56,684.39 | 修复详细数据表箭头一致性（07-28: 190.46 ↑, 08-11: 139.42 ↑, 移除 ↑↓ 双箭头）
+                <strong>2026-08-18（08-18检查入档）</strong>：08-18 第二疗程·第2次化疗前检查记录入档 | 关键指标：CA19-9 79.24（↓43% <100，化疗显著有效✅）；白细胞 26.13↑ + 中性粒细胞 15.68↑（升白针艾贝格司亭α作用）；血红蛋白 102 + 红细胞 3.24（轻度贫血改善）；估算肾小球滤过率 89.48 G2 期；ALT 6 + AST 17；乳酸脱氢酶 333↑ | 费用：挂号 ¥25 + 检查 ¥202.96 = ¥227.96（医保统筹¥197.52 + 个人账户¥30.44）| 累计 ¥56,684.39 | 修复详细数据表箭头一致性（07-28: 190.46 ↑, 08-11: 139.42 ↑, 移除 ↑↓ 双箭头）
             </div>
             <div style="margin-top:6px;padding:8px;background:#f8f9fa;border-radius:4px;">
                 <strong>2026-08-11（UI/UE 审计）</strong>：22 个问题修复 + 6 个疗程虚线框分组 + 状态列语义化 + 关键决策日期统一
@@ -3070,18 +3622,18 @@
                     const availWidth = parent.clientWidth - 30;
                     if (availWidth <= 0) return;
                     // 中文字符宽度 ≈ 字号
-                    let size = Math.min(32, Math.floor(availWidth / el.textContent.length));
-                    size = Math.max(18, size);
+                    let size = Math.min(48, Math.floor(availWidth / el.textContent.length));
+                    size = Math.max(24, size);
                     el.style.setProperty('--name-font-size', size + 'px');
                 });
 
-                // 年龄：根据容器宽度自适应
+                // 年龄：根据容器宽度自适应（与姓名同字号）
                 document.querySelectorAll('[data-auto-size="age"]').forEach(el => {
                     const parent = el.parentElement;
                     const availWidth = parent.clientWidth - 30;
                     if (availWidth <= 0) return;
-                    let size = Math.min(26, Math.floor(availWidth / el.textContent.length));
-                    size = Math.max(18, size);
+                    let size = Math.min(48, Math.floor(availWidth / el.textContent.length));
+                    size = Math.max(24, size);
                     el.style.setProperty('--age-font-size', size + 'px');
                 });
 
@@ -3126,7 +3678,7 @@
             new Chart(document.getElementById('tumorChart'), {
                 type: 'line',
                 data: {
-                    labels: ['07-10（第1次化疗前）', '07-21（第2次化疗前）', '07-28（第3次化疗前）', '08-11（第4次化疗前）', '08-18（第5次化疗前）'],
+                    labels: ['07-10 第1次化疗前', '07-21 第2次化疗前', '07-28 第3次化疗前', '08-11 第4次化疗前', '08-18 第5次化疗前'],
                     datasets: [{
                         label: 'CA19-9 (U/mL)',
                         data: [131, 317.8, 190.46, 139.42, 79.24],
@@ -3135,23 +3687,67 @@
                         tension: 0.3,
                         fill: true,
                         pointRadius: 6,
-                        pointHoverRadius: 8
+                        pointHoverRadius: 8,
+                        yAxisID: 'y'
                     }, {
                         label: 'CEA (ng/mL)',
                         data: [1.38, 1.77, null, 1.43, null],
                         borderColor: '#4ecdc4',
                         backgroundColor: 'rgba(78,205,196,0.1)',
                         tension: 0.3,
-                        fill: true,
+                        fill: false,
                         pointRadius: 6,
-                        pointHoverRadius: 8
+                        pointHoverRadius: 8,
+                        yAxisID: 'y'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top' }
+                        legend: { position: 'top' },
+                        annotation: {
+                            annotations: {
+                                ca199Limit: {
+                                    type: 'line',
+                                    yMin: 37, yMax: 37,
+                                    borderColor: '#ff6b6b',
+                                    borderWidth: 1.5,
+                                    borderDash: [3, 3],
+                                    label: {
+                                        display: true,
+                                        content: 'CA19-9 上限 37',
+                                        position: 'end',
+                                        backgroundColor: 'rgba(255,255,255,0.92)',
+                                        color: '#333',
+                                        font: { size: 10, weight: '500' },
+                                        padding: 4,
+                                        borderRadius: 3,
+                                        borderColor: '#ff6b6b',
+                                        borderWidth: 1
+                                    }
+                                },
+                                ceaLimit: {
+                                    type: 'line',
+                                    yMin: 5, yMax: 5,
+                                    borderColor: '#4ecdc4',
+                                    borderWidth: 1.5,
+                                    borderDash: [3, 3],
+                                    label: {
+                                        display: true,
+                                        content: 'CEA 上限 5',
+                                        position: 'end',
+                                        backgroundColor: 'rgba(255,255,255,0.92)',
+                                        color: '#333',
+                                        font: { size: 10, weight: '500' },
+                                        padding: 4,
+                                        borderRadius: 3,
+                                        borderColor: '#4ecdc4',
+                                        borderWidth: 1
+                                    }
+                                }
+                            }
+                        }
                     },
                     scales: {
                         y: { beginAtZero: true, title: { display: true, text: '数值' } }
@@ -3163,29 +3759,78 @@
             new Chart(document.getElementById('wbcChart'), {
                 type: 'line',
                 data: {
-                    labels: ['07-10（第1次化疗前）', '07-21（第2次化疗前）', '07-28（第3次化疗前）', '08-11（第4次化疗前）', '08-18（第5次化疗前）'],
+                    labels: ['07-10 第1次化疗前', '07-21 第2次化疗前', '07-28 第3次化疗前', '08-11 第4次化疗前', '08-18 第5次化疗前'],
                     datasets: [{
                         label: '白细胞 (×10⁹/L)',
                         data: [3.52, 2.24, 13.44, 3.23, 26.13],
                         borderColor: '#ffc107',
                         backgroundColor: 'rgba(255,193,7,0.1)',
                         tension: 0.3,
-                        fill: true,
-                        pointRadius: 6
+                        fill: false,
+                        pointRadius: 6,
+                        yAxisID: 'y'
                     }, {
-                        label: '中性粒绝对值',
+                        label: '中性粒细胞绝对值 (×10⁹/L)',
                         data: [2.51, 1.04, 10.66, 1.38, 15.68],
                         borderColor: '#17a2b8',
                         backgroundColor: 'rgba(23,162,184,0.1)',
                         tension: 0.3,
-                        fill: true,
-                        pointRadius: 6
+                        fill: false,
+                        pointRadius: 6,
+                        yAxisID: 'y'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'top' } },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top' },
+                        annotation: {
+                            annotations: {
+                                wbcRange: {
+                                    type: 'box',
+                                    yMin: 3.5, yMax: 9.5,
+                                    backgroundColor: 'rgba(255,193,7,0.10)',
+                                    borderColor: '#ffc107',
+                                    borderWidth: 1.5,
+                                    borderDash: [3, 3],
+                                    label: {
+                                        display: true,
+                                        content: '白细胞参考 3.5-9.5',
+                                        position: { x: 'start', y: 'start' },
+                                        backgroundColor: 'rgba(255,255,255,0.92)',
+                                        color: '#333',
+                                        font: { size: 10, weight: '500' },
+                                        padding: 4,
+                                        borderRadius: 3,
+                                        borderColor: '#ffc107',
+                                        borderWidth: 1
+                                    }
+                                },
+                                neutRange: {
+                                    type: 'box',
+                                    yMin: 1.8, yMax: 6.3,
+                                    backgroundColor: 'rgba(23,162,184,0.10)',
+                                    borderColor: '#17a2b8',
+                                    borderWidth: 1.5,
+                                    borderDash: [3, 3],
+                                    label: {
+                                        display: true,
+                                        content: '中性粒细胞参考 1.8-6.3',
+                                        position: { x: 'end', y: 'end' },
+                                        backgroundColor: 'rgba(255,255,255,0.92)',
+                                        color: '#333',
+                                        font: { size: 10, weight: '500' },
+                                        padding: 4,
+                                        borderRadius: 3,
+                                        borderColor: '#17a2b8',
+                                        borderWidth: 1
+                                    }
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         y: { beginAtZero: true, title: { display: true, text: '×10⁹/L' } }
                     }
@@ -3196,14 +3841,14 @@
             new Chart(document.getElementById('hgbChart'), {
                 type: 'line',
                 data: {
-                    labels: ['07-10（第1次化疗前）', '07-21（第2次化疗前）', '07-28（第3次化疗前）', '08-11（第4次化疗前）', '08-18（第5次化疗前）'],
+                    labels: ['07-10 第1次化疗前', '07-21 第2次化疗前', '07-28 第3次化疗前', '08-11 第4次化疗前', '08-18 第5次化疗前'],
                     datasets: [{
                         label: '血红蛋白 (g/L)',
                         data: [118, 94, 90, 96, 102],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231,76,60,0.1)',
                         tension: 0.3,
-                        fill: true,
+                        fill: false,
                         pointRadius: 6,
                         yAxisID: 'y'
                     }, {
@@ -3221,14 +3866,62 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { position: 'top' } },
+                    plugins: {
+                        legend: { position: 'top' },
+                        annotation: {
+                            annotations: {
+                                hgbRange: {
+                                    type: 'box',
+                                    yMin: 115, yMax: 150,
+                                    yScaleID: 'y',
+                                    backgroundColor: 'rgba(231,76,60,0.10)',
+                                    borderColor: '#e74c3c',
+                                    borderWidth: 1.5,
+                                    borderDash: [3, 3],
+                                    label: {
+                                        display: true,
+                                        content: '血红蛋白参考 115-150',
+                                        position: { x: 'start', y: 'start' },
+                                        backgroundColor: 'rgba(255,255,255,0.92)',
+                                        color: '#333',
+                                        font: { size: 10, weight: '500' },
+                                        padding: 4,
+                                        borderRadius: 3,
+                                        borderColor: '#e74c3c',
+                                        borderWidth: 1
+                                    }
+                                },
+                                pltRange: {
+                                    type: 'box',
+                                    yMin: 125, yMax: 350,
+                                    yScaleID: 'y1',
+                                    backgroundColor: 'rgba(155,89,182,0.10)',
+                                    borderColor: '#9b59b6',
+                                    borderWidth: 1.5,
+                                    borderDash: [3, 3],
+                                    label: {
+                                        display: true,
+                                        content: '血小板参考 125-350',
+                                        position: { x: 'end', y: 'end' },
+                                        backgroundColor: 'rgba(255,255,255,0.92)',
+                                        color: '#333',
+                                        font: { size: 10, weight: '500' },
+                                        padding: 4,
+                                        borderRadius: 3,
+                                        borderColor: '#9b59b6',
+                                        borderWidth: 1
+                                    }
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         y: {
                             type: 'linear',
                             position: 'left',
                             beginAtZero: false,
                             min: 80,
-                            max: 130,
+                            max: 160,
                             title: { display: true, text: '血红蛋白 (g/L)' }
                         },
                         y1: {
@@ -3236,7 +3929,7 @@
                             position: 'right',
                             beginAtZero: false,
                             min: 100,
-                            max: 350,
+                            max: 380,
                             title: { display: true, text: '血小板 (×10⁹/L)' },
                             grid: { drawOnChartArea: false }
                         }
