@@ -1,0 +1,3260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- ==================== HTML 头部 ==================== -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>陈三姐 - 康复追踪</title>
+
+    <!-- ==================== CSS 样式（移到 head，避免 iOS Safari canvas 测量为 0） ==================== -->
+    <style>
+
+        /* ========== 基础样式 ========== */
+        * {
+            box-sizing: border-box;
+        }
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            line-height: 1.8;
+            background: #fff;
+            font-size: 16px;
+        }
+
+        /* ========== 标题 ========== */
+        .main-title {
+            color: #1a5f7a;
+            border-bottom: 3px solid #1a5f7a;
+            padding-bottom: 12px;
+            font-size: 24px;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        .section-title {
+            color: #2c7873;
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-left: 5px solid #2c7873;
+            padding-left: 12px;
+            line-height: 1.4;
+        }
+        .subsection-title {
+            color: #555;
+            font-size: 15px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* ========== 患者信息网格（电脑端三等分 + 自适应字号） ========== */
+        .patient-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);   /* 电脑端固定三等分 */
+            gap: 15px;
+            margin: 20px 0 30px;
+            align-items: stretch;                     /* 三框等高 */
+        }
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            min-width: 0;          /* 允许子元素收缩 */
+            overflow: hidden;
+        }
+        .info-item label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .info-item span {
+            display: block;
+            font-weight: bold;
+            color: #1a5f7a;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        /* 姓名：根据字符数计算，JS 动态适配 1/3 宽度容器 */
+        .info-name span {
+            font-size: var(--name-font-size, 28px);
+            white-space: nowrap;
+        }
+        /* 年龄：JS 动态适配 1/3 宽度容器 */
+        .info-age span {
+            font-size: var(--age-font-size, 22px);
+            white-space: nowrap;
+        }
+        /* 当前阶段：JS 动态计算字符密度，长文本自动缩小并允许换行 */
+        .info-stage {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .info-stage span {
+            font-size: var(--stage-font-size, 12px);
+            text-align: center;
+            letter-spacing: 0;
+            line-height: 1.4;
+            /* 阶段文本允许换行，按行高节奏展开 */
+        }
+
+        /* ========== 书签导航 ========== */
+        .tab-nav {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 25px;
+            flex-wrap: nowrap;
+            gap: 5px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .tab-nav::-webkit-scrollbar {
+            display: none;
+        }
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 15px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-height: 44px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tab-btn:hover {
+            color: #1a5f7a;
+            background: #f8f9fa;
+        }
+        .tab-btn.active {
+            color: #1a5f7a;
+            border-bottom-color: #1a5f7a;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ========== 表格样式（横向滚动 + 表头固定） ========== */
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 15px 0;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .table-wrap::-webkit-scrollbar {
+            height: 6px;
+        }
+        .table-wrap::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #f5f7fa;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 10px 14px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        td {
+            background: #fff;
+        }
+        th {
+            color: #333;
+            font-weight: 600;
+        }
+        tr:hover td {
+            background: #f8f9fa;
+        }
+        /* ========== 异常值标记（用于数字单元格内） ========== */
+        .abnormal {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+        /* ========== 状态列专用：仅对显式标记的单元格加粗 ========== */
+        td.status-cell {
+            font-weight: 600;
+        }
+
+        /* ========== 疗程块（治疗时间线分组，解决"6 个疗程定位难"） ========== */
+        .course-block {
+            border: 1.5px dashed #b8c5d6;
+            border-radius: 10px;
+            padding: 18px 22px 22px;
+            margin: 22px 0 30px;
+            background: rgba(248, 249, 250, 0.4);
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .course-block:hover {
+            border-color: #2c7873;
+        }
+        .course-block > .section-title:first-child {
+            margin-top: 0;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #b8c5d6;
+            margin-bottom: 14px;
+        }
+        /* 已完成 / 进行中：绿色实线，更醒目 */
+        .course-block--active {
+            border: 2px solid #28a745;
+            background: linear-gradient(135deg, rgba(212, 237, 218, 0.35) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+        .course-block--active > .section-title:first-child {
+            border-bottom-color: #28a745;
+        }
+        /* 远期待定：浅灰虚线，降低视觉权重 */
+        .course-block--pending {
+            border-color: #d6d8db;
+            opacity: 0.94;
+        }
+        /* 疗程标签胶囊 */
+        .course-tag {
+            display: inline-block;
+            background: #999;
+            color: #fff;
+            font-size: 12px;
+            padding: 3px 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .course-block--active .course-tag {
+            background: #28a745;
+        }
+        .course-block--pending .course-tag {
+            background: #adb5bd;
+        }
+
+        /* ========== 关键决策日期（用于 09-03 评估等关键节点） ========== */
+        .critical-date {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+
+        /* ========== 提示框中性变体（说明性提示，不带状态色） ========== */
+        .alert-neutral {
+            background: #f5f5f5;
+            border-color: #999;
+            color: #555;
+        }
+
+        /* ========== 实测结果标记（基因检测表专用） ========== */
+        .result-positive {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .result-negative {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        /* ========== 数值列（右对齐 + 等宽数字） ========== */
+        td.numeric {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        /* ========== 治疗时间线表格 - 按状态设置行背景色 ========== */
+        /* 表格行默认无背景色（继承 thead 灰），避免覆盖状态色 */
+        .table-wrap table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        /* 状态行内容左 padding，避免和左侧色条重叠 */
+        .table-wrap table tbody tr.highlight td,
+        .table-wrap table tbody tr.warning td,
+        .table-wrap table tbody tr.danger td,
+        .table-wrap table tbody tr.hospital td,
+        .table-wrap table tbody tr.pending td {
+            padding-left: 12px;
+        }
+        /* 已完成行（绿色：✓ 正常完成） */
+        .table-wrap table tbody tr.highlight {
+            background: linear-gradient(90deg, #d4edda 0%, #e8f5ec 100%) !important;
+            border-left: 4px solid #28a745;
+        }
+        /* 计划/待定行（黄色：📋 待执行） */
+        .table-wrap table tbody tr.warning {
+            background: linear-gradient(90deg, #fff3cd 0%, #fff8e1 100%) !important;
+            border-left: 4px solid #ffc107;
+        }
+        /* 异常/危险行（红色：⚠ 数据异常或方案需调整） */
+        .table-wrap table tbody tr.danger {
+            background: linear-gradient(90deg, #f8d7da 0%, #fce8eb 100%) !important;
+            border-left: 4px solid #dc3545;
+        }
+        /* 住院期间行（蓝色：🏥 华山医院住院或长海医院特需） */
+        .table-wrap table tbody tr.hospital {
+            background: linear-gradient(90deg, #e7f3ff 0%, #f0f7ff 100%) !important;
+            border-left: 4px solid #007bff;
+        }
+        /* 复合类：住院 + 已完成（如第一疗程 d1） */
+        .table-wrap table tbody tr.hospital.highlight {
+            background: linear-gradient(90deg, #cce5ff 0%, #d4edda 100%) !important;
+            border-left: 4px solid #28a745;
+        }
+        /* 复合类：住院 + 计划 */
+        .table-wrap table tbody tr.hospital.warning {
+            background: linear-gradient(90deg, #cce5ff 0%, #fff3cd 100%) !important;
+            border-left: 4px solid #ffc107;
+        }
+        /* 复合类：异常 + 已完成 */
+        .table-wrap table tbody tr.danger.highlight {
+            background: linear-gradient(90deg, #f8d7da 0%, #fff3cd 100%) !important;
+            border-left: 4px solid #dc3545;
+        }
+        /* 待定行（灰色：⏸ 远期未排期 / 待填） */
+        .table-wrap table tbody tr.pending {
+            background: #f5f5f5 !important;
+            border-left: 4px solid #adb5bd;
+        }
+        /* 悬停高亮（让用户更容易追踪行） */
+        .table-wrap table tbody tr:hover {
+            filter: brightness(0.96);
+            cursor: default;
+        }
+        /* 状态徽章：状态列文字样式 */
+        .table-wrap table tbody tr td:last-child {
+            font-weight: 600;
+        }
+
+        /* ========== 图表容器 ========== */
+        .chart-container {
+            position: relative;
+            width: 100%;                  /* 显式宽度，避免 iOS Safari 测量为 0 */
+            height: 350px;
+            margin: 20px 0;
+        }
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        /* ========== 提示框 ========== */
+        .alert {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .alert-success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+
+        /* ========== 诊断标签 ========== */
+        .diagnosis-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .tag {
+            background: #e7f3ff;
+            color: #1a5f7a;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: 1px solid #b8daff;
+        }
+        .tag.warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffc107;
+        }
+        .tag.danger {
+            background: linear-gradient(90deg, #f8d7da 0%, #fce8eb 100%);
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        /* ========== 费用大框（3 列概览） ========== */
+        .expense-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0 30px;
+        }
+        .expense-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 24px 20px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .expense-box-total {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-color: #28a745;
+        }
+        .expense-box-insurance {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border-color: #17a2b8;
+        }
+        .expense-box-personal {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            border-color: #ffc107;
+        }
+        .expense-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .expense-amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a5f7a;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        .expense-box-total .expense-amount {
+            color: #155724;
+        }
+        .expense-box-insurance .expense-amount {
+            color: #0c5460;
+        }
+        .expense-box-personal .expense-amount {
+            color: #856404;
+        }
+        .expense-note {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* ========== 时间戳 ========== */
+        .timestamp {
+            text-align: right;
+            color: #999;
+            font-size: 12px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* ========== 响应式：平板（≤ 1024px） ========== */
+        @media (max-width: 1024px) {
+            body {
+                padding: 16px;
+                font-size: 15px;
+            }
+            .main-title {
+                font-size: 22px;
+            }
+            .chart-row {
+                gap: 20px;
+            }
+            .chart-container {
+                height: 320px;
+            }
+        }
+
+        /* ========== 响应式：手机（≤ 768px） ========== */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+                font-size: 15px;
+                line-height: 1.7;
+            }
+            .expense-summary {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .expense-amount {
+                font-size: 26px;
+            }
+            .main-title {
+                font-size: 20px;
+                margin-bottom: 18px;
+            }
+            .section-title {
+                font-size: 17px;
+                margin-top: 22px;
+            }
+            .subsection-title {
+                font-size: 14px;
+            }
+            .patient-info {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin: 15px 0 20px;
+            }
+            .info-item {
+                padding: 12px 8px;
+            }
+            .info-item span {
+                font-size: 14px;
+            }
+            .chart-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .chart-container {
+                height: 280px;
+                margin: 15px 0;
+            }
+            .tab-nav {
+                margin-bottom: 18px;
+            }
+            .tab-btn {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+            table {
+                font-size: 13px;
+            }
+            th, td {
+                padding: 8px 10px;
+            }
+            .alert {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            .tag {
+                font-size: 12px;
+                padding: 5px 12px;
+            }
+            .timestamp {
+                font-size: 11px;
+                margin-top: 30px;
+            }
+        }
+
+        /* ========== 响应式：小屏手机（≤ 480px） ========== */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .main-title {
+                font-size: 18px;
+            }
+            .patient-info {
+                grid-template-columns: 1fr;
+            }
+            .chart-container {
+                height: 240px;
+            }
+            .section-title { font-size: 16px; }
+            .subsection-title { font-size: 13px; }
+            .expense-amount { font-size: 22px; }
+            .expense-box { padding: 14px 12px; }
+            .tag { font-size: 11px; padding: 4px 10px; }
+            .course-block { padding: 14px 14px 16px; margin: 16px 0 22px; }
+            .course-tag { font-size: 11px; padding: 2px 10px; }
+            .tab-btn {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+        }
+
+    </style>
+    <!-- ==================== /CSS 样式 ==================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- ==================== /HTML 头部 ==================== -->
+</head>
+<!-- ==================== HTML 主体 ==================== -->
+<body>
+    <h1 class="main-title">陈三姐 - 康复追踪</h1>
+
+    <!-- 患者信息 -->
+    <div class="patient-info">
+        <div class="info-item info-name">
+            <label>姓名</label>
+            <span data-auto-size="name">陈三姐</span>
+        </div>
+        <div class="info-item info-age">
+            <label>年龄</label>
+            <span data-auto-size="age">59岁</span>
+        </div>
+        <div class="info-item info-stage">
+            <label>当前阶段</label>
+            <span data-auto-size="stage">✅ 第二疗程·第1次化疗已完成（08-13）·08-18 化疗前检查已完成（CA19-9 显著下降至 79.24 化疗明确有效✅）·骨髓抑制波动期已恢复·09-03 增强CT评估（关键决策点：手术 vs 继续化疗）</span>
+        </div>
+    </div>
+
+    <div class="diagnosis-tags">
+        <span class="tag">胰颈胰体部恶性肿瘤（胰腺导管腺癌）</span>
+        <span class="tag danger">高血压病3级（极高危）</span>
+        <span class="tag warning">慢性乙型病毒性肝炎</span>
+    </div>
+
+    <!-- 书签导航 -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="openTab(event, 'indicators')">📊 指标趋势</button>
+        <button class="tab-btn" onclick="openTab(event, 'timeline')">📅 治疗时间线</button>
+        <button class="tab-btn" onclick="openTab(event, 'chemotherapy')">💊 治疗方案</button>
+        <button class="tab-btn" onclick="openTab(event, 'diet')">🍽️ 饮食计划</button>
+        <button class="tab-btn" onclick="openTab(event, 'expense')">💰 费用记录</button>
+        <button class="tab-btn" onclick="openTab(event, 'notes')">📝 注意事项</button>
+    </div>
+
+    <!-- 指标趋势 -->
+    <div id="indicators" class="tab-content active">
+        <!-- ========== 肿瘤标志物（CA19-9/CEA）变化趋势 ========== -->
+        <h2 class="section-title">肿瘤标志物变化趋势</h2>
+        <div class="alert alert-success">
+            <strong>趋势分析：</strong><br>
+            • <strong>07-10 基准：</strong>CA19-9 = <strong>131 ↑</strong>（高于上限 37）<br>
+            • <strong>07-21 化疗后第 6 天：</strong>CA19-9 一过性升高至 <strong>317.8 ↑</strong>（肿瘤细胞坏死后释放）<br>
+            • <strong>07-28 第二疗程前：</strong>CA19-9 = <strong>190.46 ↑</strong>（↓40%，开始下降）<br>
+            • <strong>08-11 第三疗程前：</strong>CA19-9 = <strong>139.42 ↑</strong>（接近基准 131）<br>
+            • <strong>08-18 第四疗程后第 5 天：</strong>CA19-9 = <strong>79.24 ↑</strong>（↓43%，首次 &lt;100 🎉，<strong>化疗显著有效 ✅</strong>）<br>
+            📊 较基准 131 下降 <strong>39.5%</strong>，提示 AG 方案对本患者高度敏感，可继续 6 周期完整化疗
+        </div>
+        <div class="chart-container">
+            <canvas id="tumorChart"></canvas>
+        </div>
+
+        <!-- ========== 血常规（WBC/HGB/PLT）变化趋势 ========== -->
+        <h2 class="section-title">血常规变化趋势</h2>
+        <div class="alert">
+            <strong>趋势分析：</strong><br>
+            <strong>📌 白细胞 + 中性粒（化疗间歇期骨髓抑制波动）：</strong><br>
+            • 07-10 化疗前：WBC 3.52 / 中性粒 2.51（正常范围）<br>
+            • 07-21 化疗后第 6 天：WBC <strong>2.24 ↓</strong> / 中性粒 <strong>1.04 ↓</strong>（II 度骨髓抑制）<br>
+            • 07-28 第三疗程前：WBC <strong>13.44 ↑</strong> / 中性粒 <strong>10.66 ↑</strong>（恢复期代偿性升高）<br>
+            • 08-11 第四疗程前：WBC <strong>3.23 ↓</strong> / 中性粒 <strong>1.38 ↓</strong>（再次下降，化疗间歇期第 12 天）<br>
+            • <strong>08-18 第四疗程后第 5 天：WBC 26.13 ↑ / 中性粒 15.68 ↑</strong>（升白针艾贝格司亭α 08-13 化疗当日预防性给药，第 5 天达峰 ✅）<br>
+            <strong>📌 血红蛋白（轻度贫血，逐步回升）：</strong><br>
+            • 07-10：118 → 07-21：<strong>94 ↓</strong> → 07-28：<strong>90 ↓</strong> → 08-11：<strong>96 ↓</strong> → <strong>08-18：102 ↓</strong>（较 08-11 回升 +6 g/L，仍低于下限 115）<br>
+            <strong>📌 血小板（整体稳定）：</strong><br>
+            • 07-10：181 → 07-21：164 → 07-28：146 → 08-11：241 → <strong>08-18：301</strong>（均在参考范围 125-350 ✅）<br>
+            📊 综合判断：<strong>08-18 骨髓抑制已恢复 ✅</strong>，化疗可继续
+        </div>
+        <div class="chart-row">
+            <div class="chart-container">
+                <canvas id="wbcChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="hgbChart"></canvas>
+            </div>
+        </div>
+
+        <!-- ========== 详细数据表（按日期） ========== -->
+        <h2 class="section-title">详细数据表</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>事件</th>
+                        <th>CA19-9<br><small>(U/mL, <37)</small></th>
+                        <th>CEA<br><small>(ng/mL, <5)</small></th>
+                        <th>白细胞<br><small>(×10⁹/L, 3.5-9.5)</small></th>
+                        <th>中性粒<br><small>(×10⁹/L, 1.8-6.3)</small></th>
+                        <th>血红蛋白<br><small>(g/L, 115-150)</small></th>
+                        <th>血小板<br><small>(×10⁹/L, 125-350)</small></th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="danger">
+                        <td>2026-07-10</td>
+                        <td>🔬 第一疗程·第1次化疗前</td>
+                        <td class="abnormal">131 ↑</td>
+                        <td>1.38</td>
+                        <td>3.52</td>
+                        <td>2.51</td>
+                        <td>118</td>
+                        <td>181</td>
+                        <td>基准值</td>
+                    </tr>
+                    <tr class="danger">
+                        <td>2026-07-21</td>
+                        <td>🔬 第一疗程·第1次化疗后（化疗后第6天）</td>
+                        <td class="abnormal">317.8 ↑</td>
+                        <td>1.77</td>
+                        <td class="abnormal">2.24 ↓</td>
+                        <td class="abnormal">1.04 ↓</td>
+                        <td class="abnormal">94 ↓</td>
+                        <td>164</td>
+                        <td>骨髓抑制</td>
+                    </tr>
+                    <tr class="danger">
+                        <td>2026-07-28</td>
+                        <td>🔬 第一疗程·第3次化疗前</td>
+                        <td class="abnormal">190.46 ↑</td>
+                        <td>-</td>
+                        <td class="abnormal">13.44 ↑</td>
+                        <td class="abnormal">10.66 ↑</td>
+                        <td class="abnormal">90 ↓</td>
+                        <td>146</td>
+                        <td>CA19-9下降40%</td>
+                    </tr>
+                    <tr class="danger">
+                        <td>2026-08-11</td>
+                        <td>🔬 第二疗程·第1次化疗前</td>
+                        <td class="abnormal">139.42 ↑</td>
+                        <td>1.43</td>
+                        <td class="abnormal">3.23 ↓</td>
+                        <td class="abnormal">1.38 ↓</td>
+                        <td class="abnormal">96 ↓</td>
+                        <td>241</td>
+                        <td>CA19-9 接近基准；骨髓抑制波动期（WBC+中性粒+HGB 偏低）</td>
+                    </tr>
+                    <tr class="danger">
+                        <td>2026-08-18</td>
+                        <td>🔬 第二疗程·第1次化疗后·第5天</td>
+                        <td class="abnormal">79.24 ↑</td>
+                        <td>-</td>
+                        <td class="abnormal">26.13 ↑</td>
+                        <td class="abnormal">15.68 ↑</td>
+                        <td class="abnormal">102 ↓</td>
+                        <td>301</td>
+                        <td>🎉 CA19-9 显著下降至 &lt;100（化疗明确有效✅）；WBC 26.13↑ 升白针艾贝格司亭α作用；eGFR 89.48 G2 期；LDH 333 ↑</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 治疗时间线 -->
+    <div id="timeline" class="tab-content">
+        <!-- ========== PET-CT 检查（确诊） ========== -->
+        <h2 class="section-title">PET-CT检查</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>事件</th>
+                        <th>医院</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="highlight">
+                        <td>2026-07-02</td>
+                        <td>🔬 PET-CT检查</td>
+                        <td>盐城第一人民医院</td>
+                        <td class="status-cell">✅ 已完成</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ========== 华山医院（确诊 + 住院） ========== -->
+        <h2 class="section-title">华山医院（确诊+住院）</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>事件</th>
+                        <th>医院</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="hospital highlight">
+                        <td>2026-07-09</td>
+                        <td>入院</td>
+                        <td>华山医院</td>
+                        <td class="status-cell">✅ 已完成</td>
+                    </tr>
+                    <tr class="hospital highlight">
+                        <td>2026-07-10</td>
+                        <td>🔬 第一疗程·第1次化疗前增强 CT+确诊</td>
+                        <td>华山医院</td>
+                        <td class="status-cell">✅ 已完成</td>
+                    </tr>
+                    <tr class="hospital highlight">
+                        <td>2026-07-14</td>
+                        <td>💉 穿刺活检+输液港植入</td>
+                        <td>华山医院</td>
+                        <td class="status-cell">✅ 已完成</td>
+                    </tr>
+                    <tr class="hospital highlight">
+                        <td>2026-07-15</td>
+                        <td>💉 第一疗程·第1次化疗</td>
+                        <td>华山医院</td>
+                        <td class="status-cell">✅ 已完成</td>
+                    </tr>
+                    <tr class="hospital highlight">
+                        <td>2026-07-16</td>
+                        <td>🏥 出院</td>
+                        <td>华山医院</td>
+                        <td class="status-cell">✅ 已完成</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ========== 第一疗程 ========== -->
+        <div class="course-block course-block--active">
+            <div class="course-tag">✅ 已完成 · 2026-07-15 ~ 2026-07-30</div>
+            <h2 class="section-title">第一疗程（AG方案）</h2>
+        <div class="alert alert-info">
+            <strong>疗程说明：</strong>每个疗程为 4 周：第 1/8/15 天给药（连续 3 周），随后休整 1 周用于骨髓恢复
+        </div>
+
+        <h3 class="subsection-title">第一疗程·第1周</h3>
+        <div class="alert alert-info">
+            <strong>ℹ️ 7-15 化疗事件：</strong>已记录在「华山医院（确诊+住院）」表中，本表不重复展示
+        </div>
+
+        <h3 class="subsection-title">第一疗程·第2周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight">
+                    <td>2026-07-20</td>
+                    <td>🏥 输液港换药 + 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-07-20</td>
+                    <td>🧬 基因检测（实体瘤 559 基因 + PD-L1）</td>
+                    <td>广州迈景基因医学科技有限公司</td>
+                    <td class="status-cell">⚠ 已付款（支付宝/招商银行卡），07-29 报告出具 + 07-30 发票开具</td>
+                </tr>
+                <tr class="highlight">
+                    <td>2026-07-21</td>
+                    <td>化疗后检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr class="highlight">
+                    <td>2026-07-23</td>
+                    <td>💉 第一疗程·第2次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第一疗程·第3周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight">
+                    <td>2026-07-22</td>
+                    <td>🏥 肠胃复诊（普外+消化+肿瘤 3 科）</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr class="highlight">
+                    <td>2026-07-25</td>
+                    <td>🏥 门诊拆线</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr class="highlight">
+                    <td>2026-07-28</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr class="highlight">
+                    <td>2026-07-30</td>
+                    <td>💉 第一疗程·第3次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">休整期（第4周）</h3>
+        <div class="alert">
+            <strong>07-31 ~ 08-10：</strong>休整期，骨髓恢复
+        </div>
+        <div class="alert alert-info">
+            <strong>ℹ️ 09-03 增强 CT 评估（第二疗程后）</strong>，符合"每 2 疗程 1 次"原则。<strong class="critical-date">⚠️ 关键决策点：手术 vs 继续化疗（09-03）</strong>
+        </div>
+
+        <!-- ========== 第二疗程 ========== -->
+        </div>
+        <div class="course-block course-block--active">
+            <div class="course-tag">✅ 第1周已完成（08-11 检查 + 08-13 化疗）· 第2周检查已完成（08-18）</div>
+            <h2 class="section-title">第二疗程（AG方案）</h2>
+
+        <h3 class="subsection-title">第二疗程·第1周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight">
+                    <td>2026-08-11</td>
+                    <td>🔬 化疗前检查（含血常规/生化/Crea/肿瘤标志物）·📌 与主治讨论 G12D 试验+维持治疗+CBL</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr class="highlight">
+                    <td>2026-08-13</td>
+                    <td>💉 第二疗程·第1次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">✅ 已完成（AG方案+曲拉西利+升白针预防）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第二疗程·第2周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight">
+                    <td>2026-08-18</td>
+                    <td>🔬 化疗前检查（含血常规/生化/Crea/肿瘤标志物 + 恩替卡韦30片）</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">✅ 已完成（CA19-9 79.24 ↓43% 化疗显著有效✅）</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-08-20</td>
+                    <td>💉 第二疗程·第2次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">📋 计划</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第二疗程·第3周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-08-25</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">📋 计划</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-08-27</td>
+                    <td>💉 第二疗程·第3次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">📋 计划</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">休整期（第4周）</h3>
+        <div class="alert">
+            <strong>08-28 ~ 09-07：</strong>休整期，骨髓恢复
+        </div>
+
+        <!-- ===== 增强 CT 评估节点（CSCO 影像评估） ===== -->
+        <h3 class="subsection-title">第二疗程评估</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-09-03</td>
+                    <td>增强CT评估</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">📋 计划</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- ========== 第三疗程 ========== -->
+        </div>
+        <div class="course-block course-block--pending">
+            <div class="course-tag">⏸ 待定 · 依据 09-03 评估结果</div>
+            <h2 class="section-title">第三疗程（AG方案）</h2>
+        <div class="alert alert-info">
+            <strong>📅 预排计划：</strong>以下日期为基于标准 AG 4 周节奏的预排，最终执行需根据 09-03 增强 CT、血常规、肝肾功能及医生评估调整
+        </div>
+
+        <h3 class="subsection-title">第三疗程·第1周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-09-09</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-09-10</td>
+                    <td>💉 第三疗程·第1次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第三疗程·第2周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-09-15</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-09-17</td>
+                    <td>💉 第三疗程·第2次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第三疗程·第3周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-09-22</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-09-24</td>
+                    <td>💉 第三疗程·第3次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">休整期（第4周）</h3>
+        <div class="alert">
+            <strong>09-25 ~ 10-05：</strong>休整期，骨髓恢复
+        </div>
+
+        <!-- ========== 第四疗程 ========== -->
+        </div>
+        <div class="course-block course-block--pending">
+            <div class="course-tag">⏸ 待定 · 依据后续 CT 评估</div>
+            <h2 class="section-title">第四疗程（AG方案）</h2>
+        <div class="alert alert-info">
+            <strong>📅 预排计划：</strong>以下日期为基于标准 AG 4 周节奏的预排，最终执行需根据 09-03 / 11-04 增强 CT 评估、血常规、肝肾功能及医生评估调整
+        </div>
+
+        <h3 class="subsection-title">第四疗程·第1周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-10-06</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-10-08</td>
+                    <td>💉 第四疗程·第1次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第四疗程·第2周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-10-13</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-10-15</td>
+                    <td>💉 第四疗程·第2次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第四疗程·第3周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-10-20</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-10-22</td>
+                    <td>💉 第四疗程·第3次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">休整期（第4周）</h3>
+        <div class="alert">
+            <strong>10-23 ~ 11-02：</strong>休整期，骨髓恢复
+        </div>
+
+        <h3 class="subsection-title">第四疗程评估</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-11-04</td>
+                    <td>增强CT评估（每2疗程1次）</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- ========== 第五疗程 ========== -->
+        </div>
+        <div class="course-block course-block--pending">
+            <div class="course-tag">⏸ 待定 · 依据后续 CT 评估</div>
+            <h2 class="section-title">第五疗程（AG方案）</h2>
+        <div class="alert alert-info">
+            <strong>📅 预排计划：</strong>以下日期为基于标准 AG 4 周节奏的预排，最终执行需根据 11-04 增强 CT 评估结果调整
+        </div>
+
+        <h3 class="subsection-title">第五疗程·第1周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-11-03</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-11-05</td>
+                    <td>💉 第五疗程·第1次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第五疗程·第2周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-11-10</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-11-12</td>
+                    <td>💉 第五疗程·第2次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第五疗程·第3周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-11-17</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-11-19</td>
+                    <td>💉 第五疗程·第3次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">休整期（第4周）</h3>
+        <div class="alert">
+            <strong>11-20 ~ 11-30：</strong>休整期，骨髓恢复
+        </div>
+
+        <!-- ========== 第六疗程 ========== -->
+        </div>
+        <div class="course-block course-block--pending">
+            <div class="course-tag">⏸ 待定 · 依据后续 CT 评估</div>
+            <h2 class="section-title">第六疗程（AG方案）</h2>
+        <div class="alert alert-info">
+            <strong>📅 预排计划：</strong>以下日期为基于标准 AG 4 周节奏的预排，最终执行需根据 11-04 / 12-30 增强 CT 评估结果调整
+        </div>
+
+        <h3 class="subsection-title">第六疗程·第1周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-12-01</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-12-03</td>
+                    <td>💉 第六疗程·第1次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第六疗程·第2周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-12-08</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-12-10</td>
+                    <td>💉 第六疗程·第2次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第六疗程·第3周</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-12-15</td>
+                    <td>🔬 化疗前检查</td>
+                    <td>长海医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+                <tr class="warning">
+                    <td>2026-12-17</td>
+                    <td>💉 第六疗程·第3次化疗</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">休整期（第4周）</h3>
+        <div class="alert">
+            <strong>12-18 ~ 12-28：</strong>休整期，骨髓恢复
+        </div>
+
+        <h3 class="subsection-title">第六疗程评估</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>事件</th>
+                    <th>医院</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="warning">
+                    <td>2026-12-30</td>
+                    <td>增强CT评估（每2疗程1次）</td>
+                    <td>华山医院</td>
+                    <td class="status-cell">⏳ 待定</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+        </div>
+    </div>
+
+    <!-- 化疗方案 -->
+    <div id="chemotherapy" class="tab-content">
+        <!-- ========== AG 方案详解 ========== -->
+        <h2 class="section-title">AG化疗方案详解</h2>
+
+        <!-- 方案组成（白蛋白紫杉醇 + GEM） -->
+        <h3 class="subsection-title">方案组成</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>药物</th>
+                    <th>商品名</th>
+                    <th>剂量</th>
+                    <th>给药方式</th>
+                    <th>作用机制</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>白蛋白结合型紫杉醇</td>
+                    <td>艾越</td>
+                    <td>125mg/m²</td>
+                    <td>静脉滴注</td>
+                    <td>促进微管聚合，抑制肿瘤细胞分裂</td>
+                </tr>
+                <tr>
+                    <td>吉西他滨</td>
+                    <td>益非</td>
+                    <td>1000mg/m²</td>
+                    <td>静脉滴注</td>
+                    <td>核苷类似物，抑制DNA合成</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- 疗程安排（标准 AG 4 周节奏） -->
+        <h3 class="subsection-title">疗程安排</h3>
+        <div class="alert alert-info">
+            <strong>CSCO 指南标准 AG 方案（1A 类证据）：</strong>白蛋白结合型紫杉醇 125mg/m² + GEM 1000mg/m²，d1/d8/d15 给药，每 4 周一个疗程<br>
+            <strong>本患者实际安排：</strong>首次 7-15（周三），自 7-23 起按每周四化疗节奏，3 周化疗 + 1 周休整 = 4 周一个疗程（华山医院个性化排期，剂量记录为指南常用剂量，实际以医嘱为准）<br>
+            <strong>证据级别：</strong>CSCO 2024 转移性胰腺癌一线治疗 Ⅰ 级推荐 1A 类
+        </div>
+
+        <!-- 疗效评估（基于 CA19-9 + 影像） -->
+        <h3 class="subsection-title">疗效评估</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>指标</th>
+                    <th>化疗前</th>
+                    <th>化疗后</th>
+                    <th>变化</th>
+                    <th>评估</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>CA19-9</td>
+                    <td>131 U/mL（07-10 基准）</td>
+                    <td>139.42 U/mL（08-11 第二疗程前）→ 79.24 U/mL（08-18 第二疗程后·第5天）</td>
+                    <td>化疗后一过性升高（最高 317.8）后持续下降</td>
+                    <td class="highlight">✅ 化疗明确有效（接近基准）</td>
+                </tr>
+                <tr>
+                    <td>CEA</td>
+                    <td>1.38 ng/mL</td>
+                    <td>1.77 ng/mL</td>
+                    <td>轻微升高</td>
+                    <td>正常范围内</td>
+                </tr>
+                <tr>
+                    <td>肿瘤评估</td>
+                    <td colspan="4">待影像学评估（建议治疗后复查CT）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- 常见不良反应及处理（参考 CSCO 5.1.5） -->
+        <h3 class="subsection-title">常见不良反应及处理</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>不良反应</th>
+                    <th>严重程度</th>
+                    <th>本患者情况</th>
+                    <th>处理措施</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>骨髓抑制（白细胞+中性粒↓）</td>
+                    <td>常见</td>
+                    <td class="warning">07-21: WBC 2.24↓ 中性粒 1.04↓<br>07-28: WBC 13.44↑（代偿）<br>08-11: WBC 3.23↓ 中性粒 1.38↓<br>08-18: WBC 26.13↑ 中性粒 15.68↑（升白针艾贝格司亭α 08-13 化疗后第 5 天作用）✅</td>
+                    <td>曲拉西利预防、利可君升白治疗；化疗前复查血常规（建议 WBC≥3.0、中性粒≥1.5 方可给药）</td>
+                </tr>
+                <tr>
+                    <td>贫血（血红蛋白+红细胞↓）</td>
+                    <td>常见</td>
+                    <td class="warning">HGB: 94→90→<strong>96 g/L</strong>（08-11）→ <strong>102 g/L（08-18，+6g/L 略回升）</strong>（持续偏低）<br>RBC 08-11: 3.11↓ → 08-18: 3.24↓<br>红细胞分布宽度 CV 16.7↑ + SD 56.9↑</td>
+                    <td>铁剂（硫酸亚铁缓释片）纠正、监测、必要时输血；加强营养（动物肝脏/瘦肉/深色蔬菜/蛋白粉）</td>
+                </tr>
+                <tr>
+                    <td>恶心呕吐</td>
+                    <td>常见</td>
+                    <td>轻度</td>
+                    <td>昂丹司琼+地塞米松预防</td>
+                </tr>
+                <tr>
+                    <td>肝功能异常</td>
+                    <td>需关注</td>
+                    <td>患者有乙肝，需监测</td>
+                    <td>多烯磷脂酰胆碱护肝，恩替卡韦抗病毒</td>
+                </tr>
+                <tr>
+                    <td>周围神经病变</td>
+                    <td>紫杉醇相关</td>
+                    <td>暂无</td>
+                    <td>监测，必要时调整剂量</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- ========== 基因检测结果（07-20 送检，07-29 报告出具） ========== -->
+        <h2 class="section-title">基因检测结果</h2>
+        <div class="alert alert-success">
+            <strong>🧬 肿瘤 559 基因检测报告（已出具 2026-07-29）</strong><br>
+            • <strong>检测机构：</strong>广州迈景基因医学科技有限公司（Mygene / 迈景基因）<br>
+            • <strong>报告编号：</strong>MG2625660151（采样 07-15 穿刺 FFPE 标本，质控合格）<br>
+            • <strong>关键结论：</strong><br>
+            　• 检测到 <strong>3 个 II 类潜在临床意义突变</strong>：CDKN2A + KRAS G12D + TP53 G245R<br>
+            　• 检测到 <strong>8 个 III 类意义未明突变</strong>：ARID2 / CBL / GEN1 / GNAS / MGA×2 / TGFBR2 / ZFHX3<br>
+            　• <strong>NCCN 推荐检测关键基因：</strong>BRCA1/2、错配修复基因等均<strong>未检出致病变异</strong><br>
+            　• <strong>TMB-low</strong>（7.81 mut/Mb）；<strong>MSS</strong>；<strong>PD-L1 阴性</strong>（TPS 0% / CPS 0）<br>
+            　• <strong>胚系 92 个肿瘤遗传易感基因：未检出致病变异</strong>
+        </div>
+
+        <!-- II 类潜在临床意义突变 -->
+        <h3 class="subsection-title">具有潜在临床意义的变异（II 类）</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>基因</th>
+                        <th>变异</th>
+                        <th>丰度</th>
+                        <th>临床意义（胰腺癌）</th>
+                        <th>潜在靶向 / 试验</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CDKN2A</strong></td>
+                        <td>p.R80Dfs*66（exon2，移码突变）</td>
+                        <td>22.1%</td>
+                        <td>胰腺癌常见；与 KRAS G12D、TP53 G245R 形成<strong>三突变共突变</strong>（文献综述：KRAS+CDKN2A+TP53+SMAD4 四突变预后最差；<strong>本患者未检出 SMAD4</strong>，相对偏轻）</td>
+                        <td>阿贝西利、哌柏西利（II 期试验，证据 C 级）</td>
+                    </tr>
+                    <tr class="warning">
+                        <td><strong>KRAS</strong></td>
+                        <td>p.G12D（exon2，错义突变，热点）</td>
+                        <td>21.3%</td>
+                        <td>>85% 胰腺癌携带 KRAS 突变，密码子 12 最常见；与肿瘤发生/进展相关</td>
+                        <td>目前<strong>尚无获批的 KRAS G12D 胰腺癌靶向药</strong>；可关注 I/II 期试验：Daraxonrasib、IMM-1-104、YL-17231、阿替利珠单抗+Cobimetinib、曲美替尼+Navitoclax、Avutometinib+Defactinib</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TP53</strong></td>
+                        <td>p.G245R（exon7，错义突变）</td>
+                        <td>22.3%</td>
+                        <td>功能失活突变；与化疗耐药、预后相关</td>
+                        <td>暂无成熟靶向药；Adavosertib+化疗（敏感，D 级，试验阶段）</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- III 类意义未明突变 -->
+        <h3 class="subsection-title">意义未明的变异（III 类，共 8 项，临床意义不明确）</h3>
+        <div class="alert alert-neutral">
+            <strong>ℹ️ III 类变异说明：</strong>根据 AMP/ASCO/CAP 指南，这类变异目前尚无相关临床证据支持临床决策，仅作为科研和未来证据更新参考；<strong>不影响当前治疗方案</strong>。
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>基因</th>
+                        <th>变异</th>
+                        <th>外显子</th>
+                        <th>变异类型</th>
+                        <th>丰度</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>ARID2</td><td>p.Y1663*</td><td>exon17</td><td>无义突变</td><td>19.4%</td><td>染色质重塑复合物成员</td></tr>
+                    <tr><td>CBL</td><td>p.S216T</td><td>exon4</td><td>错义突变</td><td>44.4%</td><td>E3 泛素连接酶；丰度高，需排除胚系变异（已查胚系阴性，体细胞来源可能性大）</td></tr>
+                    <tr><td>GEN1</td><td>p.W418*</td><td>exon12</td><td>无义突变</td><td>13.0%</td><td>同源重组修复相关</td></tr>
+                    <tr><td>GNAS</td><td>p.R202H</td><td>exon8</td><td>错义突变</td><td>19.2%</td><td>G 蛋白 α 亚基；常见功能获得位点</td></tr>
+                    <tr><td>MGA</td><td>p.S277C</td><td>exon2</td><td>错义突变</td><td>13.9%</td><td>MYC-MAX 网络抑制因子</td></tr>
+                    <tr><td>MGA</td><td>p.F176L</td><td>exon2</td><td>错义突变</td><td>12.6%</td><td>MGA 第二处变异（与 S277C 共存）</td></tr>
+                    <tr><td>TGFBR2</td><td>p.P129Afs*3</td><td>exon3</td><td>移码突变</td><td>23.5%</td><td>TGF-β 信号通路；PDAC 中少见，需后续随访证据</td></tr>
+                    <tr><td>ZFHX3</td><td>p.G3522_G3527dup</td><td>exon10</td><td>非移码插入</td><td>14.0%</td><td>锌指同源框转录因子</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 其他关键生物标志物 -->
+        <h3 class="subsection-title">其他关键生物标志物</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>指标</th>
+                        <th>检测结果</th>
+                        <th>临床解读</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>TMB（肿瘤突变负荷）</td>
+                        <td>7.81 个突变 / Mb（TMB-low）</td>
+                        <td>未达免疫单药获益阈值（一般 ≥10）；免疫治疗单药不优先</td>
+                    </tr>
+                    <tr>
+                        <td>MSI（微卫星状态）</td>
+                        <td>MSS（微卫星稳定）</td>
+                        <td>不符合 MSI-H/dMMR 免疫治疗适应症（胰腺癌 MSI-H 罕见）</td>
+                    </tr>
+                    <tr>
+                        <td>PD-L1 表达</td>
+                        <td>TPS 0% / CPS 0（阴性）</td>
+                        <td>免疫检查点抑制剂单药疗效预测不佳</td>
+                    </tr>
+                    <tr>
+                        <td>胚系变异（92 个肿瘤遗传易感基因）</td>
+                        <td>未检测到致病变异</td>
+                        <td>家族史（姐姐乳腺癌）未发现遗传易感基因；仍建议乳腺方向年度体检</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert">
+            <strong>💡 临床决策启示（基于本患者实测）：</strong><br>
+            • <strong>BRCA1/2 未突变</strong> → <strong>奥拉帕利 / 尼拉帕利不适用</strong>，本患者即使未来更换含铂方案也无 PARP 维持依据<br>
+            • <strong>MSS + PD-L1 阴性（CPS=0）+ TMB-low（7.81）</strong> → <strong>免疫治疗（PD-1/PD-L1 单药）不优先</strong>，仅作为后线储备<br>
+            • <strong>KRAS G12D 热点突变</strong>（21.3%）：当前国内<strong>无获批靶向药</strong>；可关注 KRAS G12D 临床试验入组（Daraxonrasib 2023 ESMO PDAC ORR 20%；NCT05379985 / NCT05726864 等）<br>
+            • <strong>KRAS+CDKN2A+TP53 三突变共存</strong>：无成熟靶向药，AG 方案仍为标准；SMAD4 未检出，相对四突变者偏轻<br>
+            • <strong>胚系 92 基因阴性</strong>：家族史（姐姐乳腺癌）未发现遗传易感基因，但<strong>仍建议家族女性乳腺/卵巢年度体检</strong>（家族史独立风险）<br>
+            • <strong>CBL p.S216T 丰度 44.4% 较高</strong>：需结合胚系结果判断来源（本患者胚系阴性，倾向体细胞来源，但仍建议关注）<br>
+            • <strong>当前主线仍是 AG 方案化疗</strong>（08-11 CA19-9 降至 139.42 接近基准，提示明确有效），基因检测结果更多用于<strong>未来二线/维持/临床试验</strong>方向参考；<strong>✅ 08-11 与主治讨论已完成</strong>（维持治疗+KRAS G12D 试验入组+CBL 高丰度随访）
+        </div>
+
+        <!-- ========== 后续治疗方案（基于基因检测） ========== -->
+        <h2 class="section-title">后续治疗方案（预留）</h2>
+        <div class="alert">
+            <strong>⚠ 以下为潜在的后续治疗方案，具体方案需根据疗效评估和基因检测结果确定</strong>
+        </div>
+
+        <!-- 基因检测建议（基于 07-29 实测结果） -->
+        <h3 class="subsection-title">基因检测建议（基于 07-29 实测结果）</h3>
+        <div class="alert alert-neutral">
+            <strong>ℹ️ 说明：</strong>本表对比 NCCN/CSCO 推荐检测项与本患者实际结果。"本患者实测"列已根据 07-29 报告标注，避免再次查阅报告。
+        </div>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>检测项目</th>
+                    <th>临床意义</th>
+                    <th>本患者实测</th>
+                    <th>对治疗的指导</th>
+                    <th>优先级</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>BRCA1/2基因突变</td>
+                    <td>同源重组修复缺陷 → PARP 抑制剂</td>
+                    <td><span class="result-negative">未检出</span></td>
+                    <td>❌ 奥拉帕利 / 尼拉帕利不适用</td>
+                    <td>已排除</td>
+                </tr>
+                <tr>
+                    <td>MSI/MMR检测（MLH1/PMS2/MSH2/MSH6）</td>
+                    <td>微卫星不稳定 → 免疫治疗</td>
+                    <td><span class="result-negative">MSS（阴性）</span></td>
+                    <td>❌ 免疫单药不优先</td>
+                    <td>已排除</td>
+                </tr>
+                <tr>
+                    <td>PD-L1 表达（CPS/TPS）</td>
+                    <td>免疫治疗疗效预测</td>
+                    <td><span class="result-negative">CPS=0 / TPS=0</span></td>
+                    <td>❌ 免疫单药不优先</td>
+                    <td>已排除</td>
+                </tr>
+                <tr>
+                    <td>HER2（ERBB2）突变/扩增</td>
+                    <td>靶向药（ trastuzumab / DS-8201 等）</td>
+                    <td><span class="result-negative">未检出</span></td>
+                    <td>❌ 无 HER2 靶向治疗依据</td>
+                    <td>已排除</td>
+                </tr>
+                <tr>
+                    <td>NTRK1/2/3 融合</td>
+                    <td>罕见但有靶向药（拉罗替尼、恩曲替尼）</td>
+                    <td><span class="result-negative">未检出</span></td>
+                    <td>❌ 无 NTRK 靶向治疗依据</td>
+                    <td>已排除</td>
+                </tr>
+                <tr>
+                    <td>ROS1 / ALK 重排</td>
+                    <td>克唑替尼等 TKI</td>
+                    <td><span class="result-negative">未检出</span></td>
+                    <td>❌ 无 ALK/ROS1 靶向治疗依据</td>
+                    <td>已排除</td>
+                </tr>
+                <tr>
+                    <td>BRAF V600E</td>
+                    <td>达拉非尼+曲美替尼</td>
+                    <td><span class="result-negative">未检出</span></td>
+                    <td>❌ 无 BRAF 靶向治疗依据</td>
+                    <td>已排除</td>
+                </tr>
+                <tr>
+                    <td>KRAS G12C 突变</td>
+                    <td>索托拉西布 / 阿达格拉西布（已有获批药）</td>
+                    <td><span class="result-negative">未检出</span>（本患者为 G12D，非 G12C）</td>
+                    <td>❌ G12C 抑制剂不适用</td>
+                    <td>已排除</td>
+                </tr>
+                <tr class="warning">
+                    <td><strong>KRAS G12D 突变</strong></td>
+                    <td>胰腺癌最常见 KRAS 突变；国内<strong>无获批靶向药</strong></td>
+                    <td><span class="result-positive">✓ 检出（21.3%）</span></td>
+                    <td>⚠ 关注 I/II 期临床试验：Daraxonrasib、IMM-1-104、YL-17231、阿替利珠单抗+Cobimetinib、曲美替尼+Navitoclax、Avutometinib+Defactinib</td>
+                    <td>高（试验入组）</td>
+                </tr>
+                <tr class="warning">
+                    <td><strong>CDKN2A / TP53 突变</strong></td>
+                    <td>与 KRAS G12D 形成三突变共突变，预后偏差</td>
+                    <td><span class="result-positive">✓ 均检出</span>（CDKN2A 22.1% + TP53 22.3%）</td>
+                    <td>⚠ 无成熟靶向药；建议继续 AG 主线，密切监测疗效</td>
+                    <td>监测</td>
+                </tr>
+                <tr>
+                    <td>SMAD4 突变</td>
+                    <td>与 KRAS/CDKN2A/TP53 共突变预后最差</td>
+                    <td><span class="result-negative">未检出</span></td>
+                    <td>✅ 相对四突变者偏轻（参考性）</td>
+                    <td>已排除（参考）</td>
+                </tr>
+                <tr>
+                    <td>FGFR1/2/3 / RET / PALB2 / ATM / STK11</td>
+                    <td>其他 NCCN 推荐检测项</td>
+                    <td><span class="result-negative">全部未检出</span></td>
+                    <td>❌ 无对应靶向治疗依据</td>
+                    <td>已排除</td>
+                </tr>
+                <tr>
+                    <td>胚系 92 个肿瘤遗传易感基因</td>
+                    <td>遗传性肿瘤综合征筛查</td>
+                    <td><span class="result-negative">未检出致病变异</span></td>
+                    <td>✅ 家族史（姐姐乳腺癌）非胚系来源；仍建议家族女性乳腺/卵巢年度体检</td>
+                    <td>已排除（参考）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- 靶向治疗（PARP 抑制剂等） -->
+        <h3 class="subsection-title">靶向治疗</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>药物</th>
+                    <th>类型</th>
+                    <th>适应症</th>
+                    <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>奥拉帕利</td>
+                    <td>PARP抑制剂</td>
+                    <td>胚系 BRCA1/2 阳性、PS 评分好、一线含铂 ≥ 16 周无进展</td>
+                    <td>一线含铂方案后维持（CSCO 1A 类）</td>
+                </tr>
+                <tr>
+                    <td>尼拉帕利</td>
+                    <td>PARP抑制剂</td>
+                    <td>BRCA 突变（需专科评估）</td>
+                    <td>单药维持（适应证需专科确认）</td>
+                </tr>
+                <tr>
+                    <td>舒尼替尼</td>
+                    <td>多靶点TKI</td>
+                    <td>血管生成抑制剂</td>
+                    <td>二线选择</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- 免疫治疗（PD-1/PD-L1 抑制剂） -->
+        <h3 class="subsection-title">免疫治疗</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>药物</th>
+                    <th>类型</th>
+                    <th>适应症</th>
+                    <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>帕博利珠单抗</td>
+                    <td>PD-1抑制剂</td>
+                    <td>MSI-H/dMMR 实体瘤（含胰腺癌，CSCO 1B 类）</td>
+                    <td>后线单药治疗（非一线 AG 常规联合）</td>
+                </tr>
+                <tr>
+                    <td>卡瑞利珠单抗</td>
+                    <td>PD-1抑制剂</td>
+                    <td>肝胆肿瘤适应症</td>
+                    <td>国产PD-1</td>
+                </tr>
+                <tr>
+                    <td>度伐利尤单抗</td>
+                    <td>PD-L1抑制剂</td>
+                    <td>联合化疗</td>
+                    <td>吉西他滨+顺铂+度伐利尤</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- 治疗路径建议（CSCO 2024 指南整合 + 07-29 基因检测结果） -->
+        <h3 class="subsection-title">治疗路径建议（CSCO 2024 指南 + 07-29 基因检测结果）</h3>
+        <div class="alert alert-success">
+            <strong>推荐治疗路径：</strong><br>
+            1. <strong>当前：</strong>AG 方案化疗（CSCO 1A 类证据，已完成第一疗程 3 次）<br>
+            2. <strong>评估节点：</strong>每 2 个疗程进行 1 次增强 CT 评估（09-03 / 11-04 / 12-30），CA19-9 趋势作为动态监测<br>
+            3. <strong>基因检测（07-29 已出报告）：</strong><br>
+            　 • <strong>BRCA1/2 阴性</strong> → 奥拉帕利 / 尼拉帕利 <strong>不直接适用</strong>（即使未来更换含铂方案）<br>
+            　 • <strong>MSI-H/dMMR：未达</strong>（MSS） → 免疫治疗单药<strong>不优先</strong>，仅作后线储备<br>
+            　 • <strong>PD-L1 阴性（CPS=0）</strong> + TMB-low → 免疫单药获益可能性低<br>
+            　 • <strong>KRAS G12D 突变</strong>（丰度 21.3%）：当前国内<strong>无获批靶向药</strong>，可关注 I/II 期临床试验入组（Daraxonrasib / IMM-1-104 / YL-17231）<br>
+            　 • <strong>CDKN2A 移码 + TP53 G245R</strong>：与 KRAS G12D 三者共突变预后偏差（文献背景：KRAS+CDKN2A+TP53+SMAD4 全四突变预后最差，本患者未检出 SMAD4），无成熟靶向药，建议继续 AG 主线<br>
+            4. <strong>维持治疗：</strong>本患者<strong>无 BRCA 突变</strong>，奥拉帕利排除；AG 化疗有效后可考虑 <strong>替吉奥（S-1）维持</strong>（CSCO 1B 类），具体待 09-03 评估后与主治讨论<br>
+            5. <strong>二线方案（AG 进展后）：</strong><br>
+            　 • 体能状态良好：5-FU/LV 方案（替吉奥或卡培他滨）<br>
+            　 • 关注 <strong>KRAS G12D 临床试验</strong>（如适合入组，可作为试验性选择）<br>
+            　 • 免疫单药仅作 MSS + PD-L1 阴性后线储备（CSCO 1A 类证据有限，本患者综合标志物不利）<br>
+            6. <strong>支持治疗重点：</strong><br>
+            　• 营养支持（NRS 2002 评分）<br>
+            　• VTE 预防（Khorana 评分）<br>
+            　• 疼痛三阶梯治疗<br>
+            　• HBV 抗病毒持续（恩替卡韦，本患者 08-18 新增 30 片）
+        </div>
+
+        <!-- ========== 辅助用药 ========== -->
+        <h2 class="section-title">辅助用药</h2>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>类别</th>
+                    <th>药品</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>抗病毒</td>
+                    <td>恩替卡韦</td>
+                    <td>化疗前开始，控制乙肝病毒</td>
+                </tr>
+                <tr>
+                    <td>骨髓保护</td>
+                    <td>曲拉西利</td>
+                    <td>化疗前使用，预防骨髓抑制</td>
+                </tr>
+                <tr>
+                    <td>护肝</td>
+                    <td>多烯磷脂酰胆碱、联苯双酯</td>
+                    <td>需监测肝功能</td>
+                </tr>
+                <tr>
+                    <td>升白</td>
+                    <td>聚乙二醇化重组人粒细胞刺激因子（津优力）、利可君片</td>
+                    <td>骨髓抑制时使用</td>
+                </tr>
+                <tr>
+                    <td>止吐</td>
+                    <td>昂丹司琼、地塞米松</td>
+                    <td>化疗期间常规使用</td>
+                </tr>
+                <tr>
+                    <td>纠酸</td>
+                    <td>硫酸亚铁缓释片</td>
+                    <td>纠正贫血</td>
+                </tr>
+                <tr>
+                    <td>助消化</td>
+                    <td>胰酶肠溶胶囊</td>
+                    <td>改善消化功能</td>
+                </tr>
+                <tr>
+                    <td>镇痛抗炎</td>
+                    <td>塞来昔布（西乐葆）</td>
+                    <td>COX-2 抑制剂，缓解癌性疼痛 + 肌肉骨骼酸痛（注意胃肠道/心血管副作用）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- ========== 历史化疗记录 ========== -->
+        <h2 class="section-title">历史化疗记录</h2>
+
+        <h3 class="subsection-title">第1次化疗（07-15 住院期间）</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>药品</th>
+                    <th>规格</th>
+                    <th>数量</th>
+                    <th>用途</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight">
+                    <td>注射用紫杉醇（白蛋白结合型，艾越）</td>
+                    <td>100mg/瓶</td>
+                    <td>2瓶</td>
+                    <td>抗肿瘤（主药）</td>
+                </tr>
+                <tr class="highlight">
+                    <td>注射用吉西他滨(益非)</td>
+                    <td>1g/盒</td>
+                    <td>1盒</td>
+                    <td>抗肿瘤（主药）</td>
+                </tr>
+                <tr>
+                    <td>注射用曲拉西利</td>
+                    <td>300mg/瓶</td>
+                    <td>1瓶</td>
+                    <td>骨髓保护</td>
+                </tr>
+                <tr>
+                    <td>多烯磷脂酰胆碱注射液</td>
+                    <td>232.5mg/支</td>
+                    <td>4支</td>
+                    <td>护肝</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第2次化疗（07-23 门诊）</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>药品</th>
+                    <th>规格</th>
+                    <th>数量</th>
+                    <th>用途</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight">
+                    <td>注射用紫杉醇（白蛋白结合型，艾越）</td>
+                    <td>100mg/瓶</td>
+                    <td>2瓶</td>
+                    <td>抗肿瘤（主药）</td>
+                </tr>
+                <tr class="highlight">
+                    <td>注射用吉西他滨(益非)</td>
+                    <td>1g/盒</td>
+                    <td>1盒</td>
+                    <td>抗肿瘤（主药）</td>
+                </tr>
+                <tr>
+                    <td>注射用曲拉西利</td>
+                    <td>300mg/瓶</td>
+                    <td>1瓶</td>
+                    <td>骨髓保护</td>
+                </tr>
+                <tr>
+                    <td>多烯磷脂酰胆碱注射液</td>
+                    <td>232.5mg/支</td>
+                    <td>4支</td>
+                    <td>护肝</td>
+                </tr>
+                <tr>
+                    <td>硫培非格司亭注射液</td>
+                    <td>6mg/支</td>
+                    <td>1支</td>
+                    <td>升白（预防骨髓抑制）</td>
+                </tr>
+                <tr>
+                    <td>艾司奥美拉唑镁肠溶片</td>
+                    <td>20mg/片</td>
+                    <td>13片</td>
+                    <td>护胃</td>
+                </tr>
+                <tr>
+                    <td>昂丹司琼片</td>
+                    <td>8mg/片</td>
+                    <td>4片</td>
+                    <td>止吐</td>
+                </tr>
+                <tr>
+                    <td>地塞米松磷酸钠注射液</td>
+                    <td>5mg/支</td>
+                    <td>2支</td>
+                    <td>预处理</td>
+                </tr>
+                <tr>
+                    <td>脂溶性维生素注射液</td>
+                    <td>-</td>
+                    <td>1支</td>
+                    <td>营养补充</td>
+                </tr>
+                <tr>
+                    <td>多种微量元素注射液</td>
+                    <td>-</td>
+                    <td>1支</td>
+                    <td>营养补充</td>
+                </tr>
+                <tr>
+                    <td>5%葡萄糖注射液</td>
+                    <td>100ml/袋</td>
+                    <td>5袋</td>
+                    <td>溶媒</td>
+                </tr>
+                <tr>
+                    <td>0.9%氯化钠注射液</td>
+                    <td>100ml/袋</td>
+                    <td>4袋</td>
+                    <td>溶媒/冲管</td>
+                </tr>
+                <tr>
+                    <td>肝素钠注射液</td>
+                    <td>1.25万U/支</td>
+                    <td>1支</td>
+                    <td>PORT封管</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第3次化疗（07-30 第一疗程结束）</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>药品</th>
+                    <th>规格</th>
+                    <th>数量</th>
+                    <th>用途</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight">
+                    <td>注射用紫杉醇（白蛋白结合型，艾越）</td>
+                    <td>100mg/瓶</td>
+                    <td>2瓶</td>
+                    <td>抗肿瘤（主药）</td>
+                </tr>
+                <tr class="highlight">
+                    <td>注射用吉西他滨(益非)</td>
+                    <td>1g/盒</td>
+                    <td>1盒</td>
+                    <td>抗肿瘤（主药）</td>
+                </tr>
+                <tr>
+                    <td>注射用曲拉西利</td>
+                    <td>300mg/瓶</td>
+                    <td>1瓶</td>
+                    <td>骨髓保护</td>
+                </tr>
+                <tr>
+                    <td>多烯磷脂酰胆碱注射液(思复)</td>
+                    <td>232.5mg/支</td>
+                    <td>4支</td>
+                    <td>护肝</td>
+                </tr>
+                <tr>
+                    <td>昂丹司琼注射液</td>
+                    <td>8mg/支</td>
+                    <td>1支</td>
+                    <td>止吐</td>
+                </tr>
+                <tr>
+                    <td>地塞米松磷酸钠注射液(辰欣)</td>
+                    <td>5mg/支</td>
+                    <td>1支</td>
+                    <td>预处理</td>
+                </tr>
+                <tr>
+                    <td>肝素钠注射液</td>
+                    <td>1.25万U/支</td>
+                    <td>1支</td>
+                    <td>PORT封管</td>
+                </tr>
+                <tr>
+                    <td>利可君片</td>
+                    <td>20mg×48片/盒</td>
+                    <td>4盒</td>
+                    <td>升白</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">第4次化疗（08-13 第二疗程·第1次）</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>药品</th>
+                    <th>规格</th>
+                    <th>数量</th>
+                    <th>用途</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight">
+                    <td>注射用紫杉醇（白蛋白结合型，艾越）</td>
+                    <td>100mg/瓶</td>
+                    <td>2瓶</td>
+                    <td>抗肿瘤（主药）</td>
+                </tr>
+                <tr class="highlight">
+                    <td>注射用吉西他滨(益非)</td>
+                    <td>1g/盒</td>
+                    <td>1盒</td>
+                    <td>抗肿瘤（主药）</td>
+                </tr>
+                <tr>
+                    <td>注射用曲拉西利</td>
+                    <td>300mg/瓶</td>
+                    <td>1瓶</td>
+                    <td>骨髓保护（自费用药）</td>
+                </tr>
+                <tr>
+                    <td>多烯磷脂酰胆碱注射液(思复)</td>
+                    <td>232.5mg/支</td>
+                    <td>4支</td>
+                    <td>护肝</td>
+                </tr>
+                <tr>
+                    <td>昂丹司琼注射液</td>
+                    <td>8mg/支</td>
+                    <td>1支</td>
+                    <td>止吐</td>
+                </tr>
+                <tr>
+                    <td>地塞米松磷酸钠注射液(辰欣)</td>
+                    <td>5mg/支</td>
+                    <td>1支</td>
+                    <td>预处理</td>
+                </tr>
+                <tr>
+                    <td>艾贝格司亭α注射液(预充)</td>
+                    <td>20mg/支</td>
+                    <td>1支</td>
+                    <td>升白预防（自费用药）</td>
+                </tr>
+                <tr>
+                    <td>肝素钠注射液</td>
+                    <td>1.25万U/支</td>
+                    <td>2支</td>
+                    <td>PORT封管</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">口服药（08-13 开具）</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>药品</th>
+                    <th>规格</th>
+                    <th>数量</th>
+                    <th>用法</th>
+                    <th>用途</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>胰酶肠溶胶囊(得每通)</td>
+                    <td>150mg×20粒/盒</td>
+                    <td>13盒</td>
+                    <td>每日3次，每次3粒（餐中）</td>
+                    <td>助消化</td>
+                </tr>
+                <tr>
+                    <td>联苯双酯片</td>
+                    <td>25mg×20片/瓶</td>
+                    <td>9瓶</td>
+                    <td>每日3次，每次2片</td>
+                    <td>护肝</td>
+                </tr>
+                <tr>
+                    <td>左氧氟沙星片(可乐必妥)</td>
+                    <td>0.5g×4片/盒</td>
+                    <td>2盒</td>
+                    <td>每日1次，每次1片</td>
+                    <td>预防感染</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+    </div>
+
+    <!-- 饮食计划 -->
+    <div id="diet" class="tab-content">
+        <!-- ========== 饮食原则 ========== -->
+        <h2 class="section-title">饮食原则</h2>
+        <div class="alert alert-info">
+            <strong>胰腺癌患者饮食核心原则：</strong>高蛋白、高热量、少量多餐、低脂低糖、软烂易消化
+        </div>
+
+        <!-- 饮食结构建议（5 餐分配） -->
+        <h3 class="subsection-title">饮食结构建议</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>餐次</th>
+                    <th>时间</th>
+                    <th>建议内容</th>
+                    <th>热量占比</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>早餐</td>
+                    <td>07:00-08:00</td>
+                    <td>粥类、馒头、蒸蛋、牛奶</td>
+                    <td>20%</td>
+                </tr>
+                <tr>
+                    <td>辅餐</td>
+                    <td>10:00</td>
+                    <td>果汁、饼干、营养粉</td>
+                    <td>10%</td>
+                </tr>
+                <tr>
+                    <td>午餐</td>
+                    <td>12:00-13:00</td>
+                    <td>软烂面条、鱼肉、豆腐、蔬菜</td>
+                    <td>35%</td>
+                </tr>
+                <tr>
+                    <td>辅餐</td>
+                    <td>15:00-16:00</td>
+                    <td>酸奶、水果泥、安素</td>
+                    <td>10%</td>
+                </tr>
+                <tr>
+                    <td>晚餐</td>
+                    <td>18:00-19:00</td>
+                    <td>粥类、蒸菜、肉末、软面</td>
+                    <td>25%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- 推荐食物 -->
+        <h3 class="subsection-title">推荐食物</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>类别</th>
+                    <th>推荐食物</th>
+                    <th>作用</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>蛋白质</td>
+                    <td>鱼、虾、蛋、豆腐、瘦肉、豆浆</td>
+                    <td>补充营养，维持体重</td>
+                </tr>
+                <tr>
+                    <td>碳水化合物</td>
+                    <td>米粥、面条、馒头、软米饭</td>
+                    <td>提供热量</td>
+                </tr>
+                <tr>
+                    <td>蔬果</td>
+                    <td>胡萝卜、南瓜、番茄、苹果、香蕉</td>
+                    <td>补充维生素、膳食纤维</td>
+                </tr>
+                <tr>
+                    <td>营养补充</td>
+                    <td>肠内营养制剂（安素）、蛋白粉</td>
+                    <td>化疗期间营养补充</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- 禁忌食物 -->
+        <h3 class="subsection-title">禁忌食物</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>类别</th>
+                    <th>禁忌食物</th>
+                    <th>原因</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>高脂肪</td>
+                    <td>油炸食品、肥肉、奶油</td>
+                    <td>胰腺功能受损，难以消化</td>
+                </tr>
+                <tr>
+                    <td>刺激性</td>
+                    <td>辛辣、过酸、过烫食物</td>
+                    <td>刺激消化道，加重不适</td>
+                </tr>
+                <tr>
+                    <td>粗纤维</td>
+                    <td>粗粮、芹菜、笋、坚果</td>
+                    <td>增加消化负担</td>
+                </tr>
+                <tr>
+                    <td>其他</td>
+                    <td>烟酒、咖啡、浓茶</td>
+                    <td>影响恢复</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- 化疗期间饮食注意事项 -->
+        <h3 class="subsection-title">化疗期间饮食注意事项</h3>
+        <div class="alert">
+            <strong>• 恶心呕吐时：</strong>少量多餐，干稀分食，避免空腹<br>
+            <strong>• 白细胞低时：</strong>食物彻底加热，不吃生食，水果去皮<br>
+            <strong>• 腹泻时：</strong>低脂低纤维，流质为主<br>
+            <strong>• 便秘时：</strong>适当增加膳食纤维，多喝水
+        </div>
+
+        <!-- ========== 一周配餐计划 ========== -->
+        <h2 class="section-title">一周配餐计划</h2>
+
+        <h3 class="subsection-title">周一</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>早餐</td><td>小米粥 + 蒸蛋 + 小馒头</td><td>清淡易消化</td></tr>
+                <tr><td>辅餐</td><td>温热牛奶 + 苏打饼干</td><td>补充能量</td></tr>
+                <tr><td>午餐</td><td>软面条 + 清蒸鲈鱼 + 炖豆腐 + 碎菜</td><td>优质蛋白（高蛋白低脂）</td></tr>
+                <tr><td>辅餐</td><td>苹果泥 + 营养粉</td><td>维生素+热量</td></tr>
+                <tr><td>晚餐</td><td>大米粥 + 肉末蒸蛋 + 软烂青菜</td><td>晚餐清淡</td></tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">周二</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>早餐</td><td>豆浆 + 肉包子 + 白煮蛋</td><td>植物蛋白</td></tr>
+                <tr><td>辅餐</td><td>酸奶 + 软面包</td><td>益生菌</td></tr>
+                <tr><td>午餐</td><td>软米饭 + 红烧肉末 + 番茄炒蛋 + 冬瓜汤</td><td>开胃易消化</td></tr>
+                <tr><td>辅餐</td><td>香蕉泥 + 安素</td><td>营养补充</td></tr>
+                <tr><td>晚餐</td><td>排骨汤 + 软烂青菜 + 小馒头</td><td>补钙养血（限量，去油）</td></tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">周三</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>早餐</td><td>南瓜粥 + 蒸红薯 + 蛋白</td><td>粗粮细做</td></tr>
+                <tr><td>辅餐</td><td>温豆浆 + 饼干</td><td>简单补充</td></tr>
+                <tr><td>午餐</td><td>鸡丝面 + 水煮虾 + 豆腐 + 清炒西兰花</td><td>高蛋白低脂</td></tr>
+                <tr><td>辅餐</td><td>梨泥 + 蛋白粉</td><td>润肺补充</td></tr>
+                <tr><td>晚餐</td><td>山药粥 + 鱼肉丸 + 烂面条</td><td>健脾养胃</td></tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">周四</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>早餐</td><td>牛奶 + 面包 + 荷包蛋</td><td>常规搭配</td></tr>
+                <tr><td>辅餐</td><td>果汁 + 小蛋糕</td><td>开胃</td></tr>
+                <tr><td>午餐</td><td>软米饭 + 蒸肉饼 + 蒸蛋 + 青菜</td><td>家常易消化</td></tr>
+                <tr><td>辅餐</td><td>酸奶 + 水果泥</td><td>调节肠道</td></tr>
+                <tr><td>晚餐</td><td>小米粥 + 鸽子汤 + 软饼</td><td>化疗前高蛋白补充</td></tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">周五</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>早餐</td><td>燕麦粥 + 包子 + 蛋羹</td><td>粗细搭配</td></tr>
+                <tr><td>辅餐</td><td>坚果粉糊 + 饼干</td><td>热量补充</td></tr>
+                <tr><td>午餐</td><td>面条 + 番茄炖牛肉 + 炒嫩南瓜</td><td>补铁养血</td></tr>
+                <tr><td>辅餐</td><td>苹果泥 + 营养棒</td><td>能量补充</td></tr>
+                <tr><td>晚餐</td><td>蔬菜粥 + 鱼肉松 + 蒸土豆</td><td>软烂为主</td></tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">周六</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>早餐</td><td>豆浆 + 油条（少油）+ 茶叶蛋</td><td>传统早餐</td></tr>
+                <tr><td>辅餐</td><td>牛奶 + 软面包</td><td>常规补充</td></tr>
+                <tr><td>午餐</td><td>软米饭 + 清蒸鳕鱼 + 炖萝卜 + 蛋花汤</td><td>高蛋白低脂（与周一鲈鱼轮换）</td></tr>
+                <tr><td>辅餐</td><td>橙子泥 + 安素</td><td>维生素C</td></tr>
+                <tr><td>晚餐</td><td>饺子（鱼肉馅）+ 稀粥</td><td>变换口味</td></tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <h3 class="subsection-title">周日</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr><th>餐次</th><th>内容</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>早餐</td><td>红枣粥 + 鸡蛋饼 + 小米糕</td><td>补血养气</td></tr>
+                <tr><td>辅餐</td><td>酸奶 + 水果泥</td><td>调节口味</td></tr>
+                <tr><td>午餐</td><td>软米饭 + 泥鳅汤 + 炒丝瓜</td><td>高蛋白低脂，养胃补益</td></tr>
+                <tr><td>辅餐</td><td>核桃糊 + 饼干</td><td>健脑补脑</td></tr>
+                <tr><td>晚餐</td><td>白粥 + 肉松 + 蒸南瓜</td><td>简单养胃</td></tr>
+            </tbody>
+        </table>
+
+        </div>
+    </div>
+
+    <!-- 费用记录 -->
+    <div id="expense" class="tab-content">
+        <!-- 费用汇总（总费用、医保、个人现金） -->
+        <h2 class="section-title">费用汇总（含已识别+自费）</h2>
+
+        <!-- ===== 三大费用概览（大框） ===== -->
+        <div class="expense-summary">
+            <div class="expense-box expense-box-total">
+                <div class="expense-label">总费用（含基因检测）</div>
+                <div class="expense-amount">¥56,684.39</div>
+                <div class="expense-note">已识别发票 ¥46,184.39 + 基因检测自费 ¥10,500</div>
+            </div>
+            <div class="expense-box expense-box-insurance">
+                <div class="expense-label">医保统筹支付</div>
+                <div class="expense-amount">¥26,143.08</div>
+                <div class="expense-note">~46.1% · 含住院大病医保报销</div>
+            </div>
+            <div class="expense-box expense-box-personal">
+                <div class="expense-label">个人现金支付</div>
+                <div class="expense-amount">¥30,541.31</div>
+                <div class="expense-note">~53.9% · 含基因检测 ¥10,500（自费）</div>
+            </div>
+        </div>
+
+        <!-- 费用汇总明细（表格形式） -->
+        <h3 class="subsection-title">费用结构明细</h3>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                    <th>项目</th>
+                    <th>总额</th>
+                    <th>占比</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>总费用（含基因检测）</td>
+                    <td>¥56,456.43</td>
+                    <td>~100%</td>
+                    <td>已识别发票 ¥45,956.43 + 基因检测自费 ¥10,500</td>
+                </tr>
+                <tr>
+                    <td>医保统筹支付</td>
+                    <td>¥25,945.56</td>
+                    <td>~46.0%</td>
+                    <td>含住院大病医保报销</td>
+                </tr>
+                <tr class="warning">
+                    <td>个人现金支付</td>
+                    <td>¥30,510.87</td>
+                    <td>~54.0%</td>
+                    <td>含基因检测 ¥10,500（自费）</td>
+                </tr>
+                <tr>
+                    <td>——其中：已识别现金</td>
+                    <td>¥20,010.87</td>
+                    <td>~35.4%</td>
+                    <td>有发票可查（含长海医院 8 项 ¥1,861.12）</td>
+                </tr>
+                <tr>
+                    <td>——其中：基因检测自费</td>
+                    <td>¥10,500.00</td>
+                    <td>18.6%</td>
+                    <td>已付款，报告（07-29）+发票（07-30）均已获取</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- 费用明细（按日期追溯） -->
+        <h2 class="section-title">费用明细</h2>
+        <div class="table-wrap">
+
+            <table>
+            <thead>
+                <tr>
+                        <th>日期</th>
+                    <th>类型</th>
+                    <th>医院</th>
+                    <th>项目</th>
+                    <th>总额</th>
+                    <th>自费</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2026-07-02</td>
+                    <td>门诊</td>
+                    <td>盐城第一人民医院</td>
+                    <td>🔬 PET-CT检查</td>
+                    <td>¥6,300.00</td>
+                    <td>¥6,300.00</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-09~16</td>
+                    <td>住院</td>
+                    <td>华山医院</td>
+                    <td>住院(穿刺+输液港+化疗)</td>
+                    <td>¥26,888.17</td>
+                    <td>¥6,663.31</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-20</td>
+                    <td>门诊</td>
+                    <td>华山医院</td>
+                    <td>病理切片+门诊开药（含塞来昔布 ¥29.22）</td>
+                    <td>¥735.93</td>
+                    <td>¥735.93</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-20</td>
+                    <td>门诊</td>
+                    <td>广州迈景基因医学科技有限公司</td>
+                    <td>实体瘤 559 基因检测 + PD-L1（含采样 07-15 穿刺 FFPE 标本）</td>
+                    <td>¥10,500.00</td>
+                    <td>¥10,500.00</td>
+                    <td class="status-cell">✓ 报告 07-29 已出具（编号 MG2625660151）+ 发票 07-30 已开具（号码 26442000008711772001）</td>
+                </tr>
+                <tr>
+                    <td>2026-07-20</td>
+                    <td>门诊</td>
+                    <td>长海医院</td>
+                    <td>🏥 输液港换药（挂号 25 + 换药 328）</td>
+                    <td>¥353.00</td>
+                    <td>¥58.15</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-21</td>
+                    <td>门诊</td>
+                    <td>长海医院</td>
+                    <td>🔬 化疗前检查（挂号 25 + 看病 442）</td>
+                    <td>¥467.00</td>
+                    <td>¥75.25</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-22</td>
+                    <td>门诊</td>
+                    <td>长海医院</td>
+                    <td>🏥 普外（挂号 25 + 看病 34）</td>
+                    <td>¥59.00</td>
+                    <td>¥14.05</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-22</td>
+                    <td>门诊</td>
+                    <td>长海医院</td>
+                    <td>🏥 消化内科（挂号 25 + 看病 143.16）</td>
+                    <td>¥168.16</td>
+                    <td>¥30.47</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-22</td>
+                    <td>门诊</td>
+                    <td>长海医院</td>
+                    <td>🏥 肿瘤科挂号+咨询</td>
+                    <td>¥40.00</td>
+                    <td>¥23.85</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-23</td>
+                    <td>门诊</td>
+                    <td>华山医院</td>
+                    <td>第一疗程·第2次化疗</td>
+                    <td>¥4,528.09</td>
+                    <td>¥2,758.29</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-25</td>
+                    <td>门诊</td>
+                    <td>长海医院</td>
+                    <td>🏥 门诊拆线（挂号 25 + 看病 31）</td>
+                    <td>¥56.00</td>
+                    <td>¥13.60</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-28</td>
+                    <td>门诊</td>
+                    <td>长海医院</td>
+                    <td>🔬 化疗前检查（挂号 25 + 看病 237.96，含恩替卡韦 4.96）</td>
+                    <td>¥262.96</td>
+                    <td>¥44.64</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-07-30</td>
+                    <td>门诊</td>
+                    <td>华山医院</td>
+                    <td>第一疗程·第3次化疗</td>
+                    <td>¥1,367.71</td>
+                    <td>¥405.18</td>
+                    <td class="status-cell">✅ 已完成</td>
+                </tr>
+                <tr>
+                    <td>2026-08-11</td>
+                    <td>门诊</td>
+                    <td>长海医院</td>
+                    <td>🔬 化疗前检查（挂号 25 + 血常规/生化/Crea/肿瘤标志物 430）</td>
+                    <td>¥455.00</td>
+                    <td>¥73.35</td>
+                    <td class="status-cell">✅ 已完成（CA19-9 139.42 接近基准 ✅；骨髓抑制波动期）</td>
+                </tr>
+                <tr class="highlight">
+                    <td>2026-08-13</td>
+                    <td>门诊</td>
+                    <td>华山医院</td>
+                    <td>💉 第二疗程·第1次化疗（挂号+化疗药+曲拉西利+护肝+止吐+升白针(艾贝格司亭α)；部分自费用药：曲拉西利+艾贝格司亭α）</td>
+                    <td>¥4,275.41</td>
+                    <td>¥2,724.85</td>
+                    <td class="status-cell">✅ 已完成（含全自费药品告知：曲拉西利+多烯磷脂酰胆碱+艾贝格司亭α）</td>
+                </tr>
+                <tr class="highlight">
+                    <td>2026-08-18</td>
+                    <td>门诊</td>
+                    <td>长海医院</td>
+                    <td>🔬 化疗前检查（挂号 ¥25 + 血常规/生化/Crea/肿瘤标志物 ¥172.52 + 恩替卡韦30片 ¥4.96）</td>
+                    <td>¥227.96</td>
+                    <td>¥30.44</td>
+                    <td class="status-cell">✅ 已完成（CA19-9 79.24 化疗显著有效✅；医保统筹覆盖 ¥197.52，自付 ¥0）</td>
+                </tr>
+                <tr class="highlight">
+                    <td colspan="4" style="text-align: right;"><strong>💰 累计总费用（含基因检测）：</strong></td>
+                    <td><strong>¥56,684.39</strong></td>
+                    <td><strong>¥30,541.31</strong></td>
+                    <td>医保统筹 ¥26,143.08（~46.1%）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+    </div>
+
+    <!-- 注意事项 -->
+    <div id="notes" class="tab-content">
+        <!-- 重要提醒（健康警示 + 治疗监测） -->
+        <!-- ========== 重要提醒 ========== -->
+        <h2 class="section-title">重要提醒</h2>
+        <div class="alert alert-danger">
+            <strong>⚠ 乙型肝炎：</strong>患者有乙肝病史，化疗期间需密切监测肝功能，化疗前需抗病毒治疗
+        </div>
+        <!-- ===== 关键监测指标：CA19-9 临床意义（CSCO 5.2 节） ===== -->
+            <div class="alert">
+            <strong>⚠ CA19-9监测（CSCO 2024 指南 5.2 节）：</strong><br>
+            • 正常参考上限 <strong>37 U/mL</strong>，在特定筛查场景下灵敏度/特异度可达 90% 以上（受胆道梗阻、炎症、Lewis 抗原状态影响）<br>
+            • <strong>本患者趋势：</strong>化疗后一过性升高（07-21: 317.8 → 07-28: 190.46 → 08-11: 139.42 → <strong>08-18: 79.24</strong>，<strong>化疗显著有效 ✅</strong>）<br>
+            • <strong>化疗后一过性升高机制：</strong>肿瘤细胞坏死后释放 CA19-9 进入血液，<strong>可能提示治疗反应</strong>；本患者持续下降趋势提示化疗明确有效，但<strong>不能单独确认疗效</strong><br>
+            • 复发时 CA19-9 升高<strong>往往早于影像学诊断</strong>，但<strong>不能作为主要依据</strong>，仍应以影像学证据为主<br>
+            • 升高时<strong>先排查良性病</strong>（胆道梗阻、胰腺炎、胆道感染、肝硬化、肠道炎症）<br>
+            • 部分人群（约 5-10%）因 Lewis 抗原阴性而无法有效表达 CA19-9，此类患者<strong>可能持续不升高</strong>，不能排除肿瘤
+        </div>
+        <div class="alert">
+            <strong>⚠ 血红蛋白（持续偏低，但已回升）：</strong><br>
+            • <strong>趋势：</strong>94 → 90 → 96 g/L（08-11）→ <strong>102 g/L（08-18，+6g/L 略回升）</strong>，仍低于下限 115<br>
+            • <strong>红细胞：</strong>3.11↓（08-11）→ 3.24↓（08-18），参考 3.8-5.1<br>
+            • <strong>红细胞分布宽度：</strong>CV 16.7↑ + SD 56.9↑（提示红细胞大小不均，可能为缺铁或骨髓恢复期表现）<br>
+            • <strong>建议：</strong>加强营养（动物肝脏/瘦肉/深色蔬菜/蛋白粉）+ 铁剂（硫酸亚铁缓释片）
+        </div>
+        <div class="alert">
+            <strong>⚠ 白细胞+中性粒细胞（化疗间歇期骨髓抑制波动期）：</strong><br>
+            • <strong>当前（08-11 化疗前）：</strong>WBC <strong>3.23↓</strong>（参考 3.5-9.5）+ 中性粒 <strong>1.38↓</strong>（参考 1.8-6.3）<br>
+            • <strong>08-18 化疗后第 5 天：</strong>WBC <strong>26.13↑</strong> + 中性粒 <strong>15.68↑</strong>（升白针艾贝格司亭α作用，<strong>骨髓抑制已恢复 ✅</strong>）<br>
+            • <strong>典型规律：</strong>化疗后 7-10 天为最低点，14-21 天逐步恢复<br>
+            • <strong>建议：</strong>化疗前复查血常规，确保 WBC≥3.0、中性粒≥1.5 方可安全给药；08-13 已用艾贝格司亭α 预防性升白
+        </div>
+        <!-- ===== 用药警示：塞来昔布 COX-2 抑制剂 5 维警告 ===== -->
+            <div class="alert">
+            <strong>💊 塞来昔布（西乐葆，COX-2 抑制剂）使用注意：</strong><br>
+            • 用途：缓解癌性疼痛 + 肌肉骨骼酸痛（已开始服用）<br>
+            • <strong>⚠ 相互作用：</strong>可能与化疗药（特别是吉西他滨/卡培他滨）相互作用，长期联用需主治评估<br>
+            • <strong>⚠ 心血管风险：</strong>COX-2 抑制剂可增加血栓/心血管事件风险，胰腺癌患者 VTE 风险本就高（CSCO 指南 VTE 发生率 27%），需密切观察<br>
+            • <strong>⚠ 胃肠道：</strong>可引起胃部不适/溃疡，与化疗止吐药同用时注意<br>
+            • <strong>⚠ 肝肾：</strong>本患者有乙肝病史，需监测肝功能；如出现水肿/尿量变化及时告知主治<br>
+            • <strong>不宜长期使用</strong>，症状缓解后应在主治指导下停药或减量
+        </div>
+        <div class="alert alert-info">
+            <strong>🧬 基因检测结果（07-29 报告已出）：</strong><br>
+            • <strong>检测方：</strong>广州迈景基因（Mygene）实体瘤 559 基因检测 + PD-L1，¥10,500 已付款，电子发票 07-30 已开具（纳税人识别号 91440116MA59BB5E03）<br>
+            • <strong>3 个 II 类潜在临床意义突变：</strong>KRAS G12D（丰度 21.3%）、CDKN2A p.R80Dfs*66（22.1%）、TP53 G245R（22.3%）<br>
+            • <strong>8 个 III 类意义未明突变：</strong>ARID2 / CBL / GEN1 / GNAS / MGA×2 / TGFBR2 / ZFHX3（仅科研参考，不影响当前治疗）<br>
+            • <strong>NCCN 推荐检测关键基因全部未检出：</strong>BRCA1/2、HER2、NTRK1-3、ROS1、ALK、BRAF、FGFR1-3、RET、PALB2、MLH1/PMS2/MSH2/MSH6、ATM、STK11、SMAD4<br>
+            • <strong>免疫相关全阴性：</strong>MSS + PD-L1（CPS=0 / TPS=0）+ TMB-low（7.81 mut/Mb）→ 免疫单药不优先<br>
+            • <strong>胚系 92 基因阴性</strong> → 家族史（姐姐乳腺癌）非胚系来源；仍建议家族女性乳腺/卵巢年度体检<br>
+            • <strong>主线仍是 AG 方案化疗</strong>（08-11 CA19-9 降至 139.42 接近基准，08-18 进一步降至 79.24 < 100，<strong>化疗显著有效</strong>），基因结果主要用于<strong>未来二线/维持/临床试验</strong>方向；<strong>✅ 08-11 与主治讨论已完成</strong>（维持治疗+KRAS G12D 试验入组+CBL 高丰度随访），详见下方"08-11 解读"
+        </div>
+        <!-- ===== 08-18 检查指标解读（重点：CA19-9 显著下降 + 升白针作用 + eGFR G2 期） ===== -->
+            <div class="alert alert-success">
+            <strong>📊 08-18 检查指标解读（化疗后第 5 天，疗效明确）：</strong><br>
+            <strong>✅ CA19-9 显著下降至 &lt;100，化疗明确有效：</strong><br>
+            　• 趋势：131（基准）→ 317.8（化疗后一过性 ↑）→ 190.46（↓40%）→ 139.42（08-11，接近基准）→ <strong>79.24（08-18，↓43%，首次 &lt;100 🎉）</strong><br>
+            　• <strong>提示 AG 方案对本患者高度敏感，可继续 6 周期完整化疗</strong><br>
+            <strong>🟢 骨髓抑制已恢复（升白针预防性给药成功）：</strong><br>
+            　• WBC 26.13↑（升白针艾贝格司亭α 08-13 化疗当日预防性给药，化疗后第 5 天达峰）<br>
+            　• 中性粒 15.68↑ + PLT 301（正常）<br>
+            　• <strong>升白针保护作用明确，本次化疗未出现严重骨髓抑制 ✅</strong><br>
+            <strong>• 血红蛋白（102 g/L）：</strong>较 08-11 的 96 g/L 回升 +6 g/L，<strong>轻度贫血逐步改善</strong>，但仍<strong>低于下限 115</strong>，建议加强营养<br>
+            <strong>• 红细胞（3.24×10¹²/L）：</strong>较 08-11 的 3.11 略升，符合<strong>贫血恢复早期表现</strong><br>
+            <strong>🟡 其他指标关注：</strong><br>
+            　• ALT 6↓（持平）+ AST 17（正常）+ 钾 3.7（较 08-11 的 3.5 改善 ✅）<br>
+            　• <strong>前白蛋白 165↓</strong>（营养指标偏低）<br>
+            　• <strong>LDH 333↑</strong>（肿瘤负荷指标，需结合影像）<br>
+            　• 总胆汁酸 2.3（正常）+ 总蛋白 70 + 白蛋白 43（正常）<br>
+            <strong>⚠ eGFR 89.48（G2 期）需关注：</strong><br>
+            　• 较 08-11 的 111.51 下降，<strong>从 G1 期（≥90）降至 G2 期（60-89，轻度肾功下降）</strong><br>
+            　• 肌酐 65 正常。可能与化疗药肾毒性 + 营养状态有关<br>
+            　• <strong>建议：</strong>化疗前复查肾功能 + 充分水化<br>
+            <strong>📌 08-18 检查小结：</strong><br>
+            　① <strong>CA19-9 显著下降</strong>，AG 方案疗效明确，可继续<br>
+            　② <strong>骨髓抑制已恢复</strong>，升白针预防成功<br>
+            　③ <strong>eGFR G2 期</strong>需关注（化疗药代谢负担）<br>
+            　④ <strong>恩替卡韦30片</strong> 已开具（乙肝抗病毒持续治疗）
+        <!-- ===== 08-11 检查指标解读（重点：骨髓抑制+白细胞+血红蛋白+红细胞） ===== -->
+            <div class="alert alert-warning">
+            <strong>📊 08-11 检查指标解读（关键节点，已与主治讨论）：</strong><br>
+            <strong>✅ CA19-9 持续下降，化疗明确有效：</strong><br>
+            　• 趋势：131（基准）→ 317.8（化疗后一过性 ↑）→ 190.46（↓40%）→ <strong>139.42（08-11，接近基准 ↓）</strong><br>
+            　• <strong>提示 AG 方案对本患者疗效明确</strong>，建议继续当前方案<br>
+            <strong>🟡 骨髓抑制波动期（化疗间歇期典型表现）：</strong><br>
+            　• 复查：WBC 3.23↓ + 中性粒 1.38↓ + HGB 96↓ + RBC 3.11↓<br>
+            　• <strong>符合化疗间歇期第 12 天骨髓恢复不充分表现</strong>（07-30 第三次化疗 → 08-11 仅 12 天）<br>
+            　• <strong>典型规律：</strong>化疗后 7-10 天为最低点，14-21 天逐步恢复<br>
+            <strong>• 白细胞（3.23×10⁹/L）：</strong>较 07-28 的 13.44（恢复期代偿性升高）已显著回落，但未回升至正常下限以上。<strong>化疗前需确保 ≥3.0 方可安全给药</strong>（目前临界）<br>
+            <strong>• 中性粒细胞（1.38×10⁹/L）：</strong>属于<strong>轻度中性粒细胞减少（I 度）</strong>，感染风险略增。<strong>化疗前需复查确认 ≥1.5 方可给药</strong>（目前临界）<br>
+            <strong>• 血红蛋白（96 g/L）：</strong>属于<strong>轻度贫血（I 度）</strong>，较 07-28 的 90 略有回升（+6g/L），但仍<strong>持续低于下限 115</strong>。建议加强营养（动物肝脏/瘦肉/深色蔬菜）+ 继续铁剂<br>
+            <strong>• 红细胞（3.11×10¹²/L）：</strong>符合<strong>轻度贫血</strong>表现；<strong>红细胞分布宽度 CV 16.8↑ + SD 55.4↑</strong>，提示<strong>红细胞大小不均</strong>（可能为缺铁或骨髓恢复期表现）<br>
+            <strong>🟢 其他指标良好：</strong><br>
+            　• ALT 6（略低）+ AST 17（正常）肝功能稳定<br>
+            　• <strong>eGFR 111.51（G1 期）</strong>肾功能良好<br>
+            　• CA724 1.91 + CEA 1.43（均正常）<br>
+            　• <strong>钾 3.5（临界下限）</strong>建议食补（香蕉/土豆/菠菜）<br>
+            <strong>📌 08-11 与主治讨论重点（已完成）：</strong><br>
+            　① <strong>CA19-9 持续下降</strong>，AG 方案有效，可继续<br>
+            　② <strong>当前骨髓抑制需评估是否需要升白针预防</strong>（第二疗程前中性粒偏低，必要时硫培非格司亭）<br>
+            　③ <strong>维持治疗方向</strong>（替吉奥 S-1 / AG 低剂量，待 09-03 评估后定）<br>
+            　④ <strong>KRAS G12D 临床试验入组可行性</strong>（关注 Daraxonrasib / IMM-1-104 / NCT05379985 等）
+        </div>
+        <!-- ===== 关键决策节点：评估节奏（每 2 疗程 1 次） ===== -->
+            <div class="alert alert-info">
+            <strong>📋 评估节奏（每2疗程1次）：</strong><br>
+            • <strong>下次评估：</strong><strong class="critical-date">2026-09-03（关键决策点：手术 vs 继续化疗）</strong><br>
+            • <strong>后续评估：</strong>2026-11-04（⏸️ 待定）、2026-12-30（⏸️ 待定）<br>
+            • <strong>说明：</strong>化疗期间 CA19-9 趋势作为动态监测指标
+        </div>
+
+        <!-- 待完成事项（费用/报告补充） -->
+        <!-- ========== 待完成事项 ========== -->
+        <h2 class="section-title">待完成事项</h2>
+        <div class="alert">
+            <strong>📋 待完成：</strong><br>
+            • 每次化疗后及时更新指标数据<br>
+            • ~~<strong>08-11 化疗前检查时与主治讨论</strong>~~ → ✅ <strong>已完成（08-11）</strong>：讨论 KRAS G12D 试验入组 + 维持治疗 + CBL 随访；详细结果见上方"08-11 解读"区块<br>
+            • ~~<strong>08-13 化疗前复查血常规</strong>~~ → ✅ <strong>已完成（08-13）</strong>：化疗已完成，本次开具升白针（艾贝格司亭α）预防性升白<br>
+            • ~~<strong>08-18 化疗前检查</strong>~~ → ✅ <strong>已完成（08-18）</strong>：CA19-9 显著下降至 79.24（化疗显著有效✅），骨髓抑制已恢复；详见上方"08-18 解读"区块<br>
+            • <strong>08-20 第二疗程·第2次化疗</strong>（华山医院）<br>
+            • <strong>8 月底前：</strong>在 ClinicalTrials.gov / ChiCTR / 各大医院官网搜索 KRAS G12D + 胰腺癌国内试验（重点关注北京/上海/广州三甲医院）<br>
+            • 关注 KRAS G12D 胰腺癌靶向药进展（FDA/NMPA 审批动态，如 Daraxonrasib 2023 ESMO PDAC ORR 20%）<br>
+            • <strong>09-03 增强 CT 评估</strong>（关键决策点：手术 vs 继续化疗）
+        </div>
+    </div>
+
+    <div class="alert alert-info" style="font-size: 12px; padding: 8px 12px; margin-top: 30px;">
+        <strong>💡 使用说明：</strong>点击顶部标签按钮切换板块（指标趋势 / 治疗时间线 / 化疗方案 / 饮食计划 / 费用记录 / 注意事项）。在手机或平板上，表格可左右滑动查看全部列。
+    </div>
+
+    <div class="timestamp">
+        <strong>最后更新 · 2026-08-18</strong>（✅ 08-18 第二疗程·第1次化疗前检查已完成（CA19-9 79.24 ↓43% <100 化疗显著有效✅；骨髓抑制已恢复+升白针作用明确；eGFR 89.48 G2 期需关注）| 08-13 第二疗程·第1次化疗已完成 | 指标数据更新至第5行（08-18 新增） | 新增 08-18 解读区块 | 费用：¥227.96（医保统筹¥197.52 + 个人账户¥30.44）| 累计 ¥56,684.43（医保统筹 ¥26,143.08 + 个人 ¥30,541.31））
+        <details style="margin-top:6px;">
+            <summary style="cursor:pointer;color:#1a5f7a;">查看历史更新</summary>
+            <div style="margin-top:6px;padding:8px;background:#f8f9fa;border-radius:4px;">
+                <strong>2026-08-18（08-18检查入档）</strong>：08-18 第二疗程·第1次化疗前检查记录入档 | 关键指标：CA19-9 79.24（↓43% <100，化疗显著有效✅）；WBC 26.13↑ + 中性粒 15.68↑（升白针艾贝格司亭α作用）；HGB 102 + RBC 3.24（轻度贫血改善）；eGFR 89.48 G2 期；ALT 6 + AST 17；LDH 333↑ | 费用：挂号 ¥25 + 检查 ¥202.96 = ¥227.96（医保统筹¥197.52 + 个人账户¥30.44）| 累计 ¥56,684.39 | 修复详细数据表箭头一致性（07-28: 190.46 ↑, 08-11: 139.42 ↑, 移除 ↑↓ 双箭头）
+            </div>
+            <div style="margin-top:6px;padding:8px;background:#f8f9fa;border-radius:4px;">
+                <strong>2026-08-11（UI/UE 审计）</strong>：22 个问题修复 + 6 个疗程虚线框分组 + 状态列语义化 + 关键决策日期统一
+            </div>
+            <div style="margin-top:6px;padding:8px;background:#f8f9fa;border-radius:4px;">
+                <strong>2026-08-01（基因检测入档）</strong>：07-29 迈景基因实体瘤 559 基因检测 — II 类 3 项：KRAS G12D + CDKN2A + TP53 G245R；III 类 8 项；BRCA/HER2/NTRK/ALK/ROS1/BRAF 等 NCCN 关键靶点全阴性；MSS + PD-L1 CPS=0 + TMB-low 7.81；胚系 92 基因阴性）+ 07-30 发票 | 主线维持 AG 方案；建议 08-11 与主治讨论维持治疗、KRAS G12D 临床试验入组、CBL 高丰度随访 | 数据更新至第一疗程第3次化疗
+            </div>
+        </details>
+    </div>
+
+
+    <!-- ==================== JavaScript 脚本 ==================== -->
+    <script>
+        // 书签切换
+        function openTab(event, tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // 顶部"姓名/年龄/当前阶段"动态字号：根据字符数与容器宽度自适应
+        (function autoSizeTopInfo() {
+            function fit() {
+                // 姓名：根据容器宽度自适应（容器现在只有 1/3 宽度）
+                document.querySelectorAll('[data-auto-size="name"]').forEach(el => {
+                    const parent = el.parentElement;
+                    const availWidth = parent.clientWidth - 30;
+                    if (availWidth <= 0) return;
+                    // 中文字符宽度 ≈ 字号
+                    let size = Math.min(32, Math.floor(availWidth / el.textContent.length));
+                    size = Math.max(18, size);
+                    el.style.setProperty('--name-font-size', size + 'px');
+                });
+
+                // 年龄：根据容器宽度自适应
+                document.querySelectorAll('[data-auto-size="age"]').forEach(el => {
+                    const parent = el.parentElement;
+                    const availWidth = parent.clientWidth - 30;
+                    if (availWidth <= 0) return;
+                    let size = Math.min(26, Math.floor(availWidth / el.textContent.length));
+                    size = Math.max(18, size);
+                    el.style.setProperty('--age-font-size', size + 'px');
+                });
+
+                // 当前阶段：按"字符数 / 容器可用宽度"算字号，确保不溢出
+                document.querySelectorAll('[data-auto-size="stage"]').forEach(el => {
+                    const parent = el.parentElement;
+                    // 等父容器渲染完再测宽度
+                    const availWidth = parent.clientWidth - 30; // 减去 padding
+                    if (availWidth <= 0) return;
+                    const text = el.textContent;
+                    // 中文字符宽度 ≈ 字号（粗略估算）
+                    // 先按 14px 估每行可容纳字符数 = availWidth / (14 * 1)
+                    let size = 14;
+                    let charsPerLine = Math.floor(availWidth / size);
+                    if (charsPerLine <= 0) charsPerLine = 1;
+                    let lines = Math.ceil(text.length / charsPerLine);
+                    // 如果超过 4 行，缩小字号
+                    if (lines > 4) {
+                        size = Math.floor((availWidth * 4) / text.length);
+                    }
+                    // 限制区间 10px ~ 14px（第三框只有 1/3 宽度，避免太大不好看）
+                    size = Math.max(10, Math.min(14, size));
+                    el.style.setProperty('--stage-font-size', size + 'px');
+                });
+            }
+            // 首次 + 窗口变化 + 字体加载后都重新计算
+            fit();
+            window.addEventListener('resize', fit);
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(fit);
+            }
+        })();
+
+        // Chart.js 全局配置 + 三个图表初始化
+        // 包到 initCharts() 里，配合 DOMContentLoaded + requestAnimationFrame 调用，
+        // 确保 iOS Safari 上 Grid 布局完成后再创建图表（避免 canvas 测量为 0）。
+        function initCharts() {
+            Chart.defaults.font.family = '"Microsoft YaHei", "PingFang SC", sans-serif';
+            Chart.defaults.color = '#333';
+
+            // 肿瘤标志物图表
+            new Chart(document.getElementById('tumorChart'), {
+                type: 'line',
+                data: {
+                    labels: ['07-10（第1次化疗前）', '07-21（第2次化疗前）', '07-28（第3次化疗前）', '08-11（第4次化疗前）', '08-18（第5次化疗前）'],
+                    datasets: [{
+                        label: 'CA19-9 (U/mL)',
+                        data: [131, 317.8, 190.46, 139.42, 79.24],
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'rgba(255,107,107,0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }, {
+                        label: 'CEA (ng/mL)',
+                        data: [1.38, 1.77, null, 1.43, null],
+                        borderColor: '#4ecdc4',
+                        backgroundColor: 'rgba(78,205,196,0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: '数值' } }
+                    }
+                }
+            });
+
+            // 白细胞图表
+            new Chart(document.getElementById('wbcChart'), {
+                type: 'line',
+                data: {
+                    labels: ['07-10（第1次化疗前）', '07-21（第2次化疗前）', '07-28（第3次化疗前）', '08-11（第4次化疗前）', '08-18（第5次化疗前）'],
+                    datasets: [{
+                        label: '白细胞 (×10⁹/L)',
+                        data: [3.52, 2.24, 13.44, 3.23, 26.13],
+                        borderColor: '#ffc107',
+                        backgroundColor: 'rgba(255,193,7,0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 6
+                    }, {
+                        label: '中性粒绝对值',
+                        data: [2.51, 1.04, 10.66, 1.38, 15.68],
+                        borderColor: '#17a2b8',
+                        backgroundColor: 'rgba(23,162,184,0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: '×10⁹/L' } }
+                    }
+                }
+            });
+
+            // 血红蛋白+血小板图表
+            new Chart(document.getElementById('hgbChart'), {
+                type: 'line',
+                data: {
+                    labels: ['07-10（第1次化疗前）', '07-21（第2次化疗前）', '07-28（第3次化疗前）', '08-11（第4次化疗前）', '08-18（第5次化疗前）'],
+                    datasets: [{
+                        label: '血红蛋白 (g/L)',
+                        data: [118, 94, 90, 96, 102],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231,76,60,0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 6,
+                        yAxisID: 'y'
+                    }, {
+                        label: '血小板 (×10⁹/L)',
+                        data: [181, 164, 146, 241, 301],
+                        borderColor: '#9b59b6',
+                        backgroundColor: 'rgba(155,89,182,0.1)',
+                        tension: 0.3,
+                        fill: false,
+                        pointRadius: 6,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: false,
+                            min: 80,
+                            max: 130,
+                            title: { display: true, text: '血红蛋白 (g/L)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            beginAtZero: false,
+                            min: 100,
+                            max: 350,
+                            title: { display: true, text: '血小板 (×10⁹/L)' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 触发时机：DOM 解析完 + 下一帧（Grid 布局完成）
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+                requestAnimationFrame(initCharts);
+            });
+        } else {
+            requestAnimationFrame(initCharts);
+        }
+    </script>
+    <!-- ==================== /JavaScript 脚本 ==================== -->
+<!-- ==================== /HTML 主体 ==================== -->
+</body>
+</html>
