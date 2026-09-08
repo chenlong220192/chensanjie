@@ -1,0 +1,55 @@
+# mac os
+.DS_Store
+._*
+
+# AI agent
+.claude
+
+# Codex
+.codex/
+
+# Backup files
+*.bak.*
+*.bak
+*.bak-*
+*.old
+*.backup-*
+*.backup.*
+
+# 临时隔离区（项目根 .tmp/）：存放被删除的文件与待清理文件，仅留本地，永不提交
+/.tmp/
+
+# 发布产物（脱敏副本，不进私有仓；由 scripts/release_step1 按 deploy/publish.manifest.json 生成）
+out/
+
+# 前端构建中间产物（JSON 由 phase1 从 Excel 写入；不进私有仓）
+5、静态页面/data/
+
+# IDE/Editor
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+
+# WorkBuddy（保留工作记忆 + 项目级技能，排除缓存）
+.workbuddy/*
+!.workbuddy/memory/
+!.workbuddy/skills/
+.workbuddy/memory/*.tmp
+
+# OCR 方案测试目录：原始数据与中间产物（含 PII 图片/全文，仅留本地）
+# 只提交 测试结果(result/) · 测试脚本(scripts/) · 测试记录(manifests/README)
+6、暂存/OCR方案测试/**/samples/
+6、暂存/OCR方案测试/**/pages/
+6、暂存/OCR方案测试/**/outputs/
+
+# OCR 工作区：.bin/（模型本地缓存可重拉）+ 待处理/（未扫描件临时区）不进；中转/ 入仓（用户裁决：私有仓不脱敏）
+4、信息记录/.ocr/.bin/
+4、信息记录/.ocr/待处理/
+
